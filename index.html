@@ -1,0 +1,915 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>שומעת וקוראת</title>
+<style>
+:root{
+  --fs:32px;
+  --bg:#fffdf6;
+  --ink:#111;
+  --sent:#ffe9a0;
+  --word:#ffa94d;
+  --word-edge:#b45309;
+  --line:#222;
+  --bar:#f1ead6;
+  --accent:#1e3a8a;
+  --focus:#1d4ed8;
+}
+*{box-sizing:border-box}
+html{scroll-padding-bottom:200px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:1.5}
+[hidden]{display:none!important}
+
+button,select,textarea{font-family:inherit;color:inherit}
+button:focus-visible,select:focus-visible,textarea:focus-visible{outline:4px solid var(--focus);outline-offset:2px}
+
+.btn{
+  min-width:64px;min-height:64px;padding:6px 10px;
+  border:3px solid var(--line);border-radius:14px;background:#fff;color:#111;
+  font-size:17px;font-weight:700;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+}
+.btn:hover{background:#f3f0e4}
+.btn:active{background:#e6e0cc}
+.btn svg{width:26px;height:26px;fill:currentColor;display:block}
+.btn.flip svg{transform:scaleX(-1)}
+.btn.wide{flex-direction:row;gap:10px;min-width:0;padding:6px 22px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#172e6e}
+.btn.small{min-height:48px;min-width:48px;font-size:18px}
+
+/* ---------- מסך הדבקה ---------- */
+#editView{max-width:1000px;margin:0 auto;padding:28px 20px 40px}
+#editView h1{font-size:34px;margin:0 0 6px}
+#editView p.sub{font-size:21px;margin:0 0 18px}
+#src{
+  width:100%;min-height:55vh;padding:20px;
+  font-size:26px;line-height:1.7;direction:ltr;text-align:left;
+  background:#fff;border:3px solid var(--line);border-radius:14px;resize:vertical;
+}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:18px}
+#count{font-size:20px}
+
+/* ---------- מסך הקריאה ---------- */
+#topbar{
+  position:sticky;top:0;z-index:20;background:var(--bar);border-bottom:3px solid var(--line);
+  padding:8px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+}
+#topbar .spacer{flex:1}
+#where{font-size:19px;font-weight:700}
+#prog{position:absolute;left:0;right:0;bottom:-3px;height:5px;background:transparent}
+#progFill{height:100%;width:0;background:var(--accent);margin-right:auto}
+
+#page{padding:34px 24px 260px}
+#text{
+  direction:ltr;text-align:left;
+  max-width:32em;margin:0 auto;
+  font-size:var(--fs);line-height:2.15;letter-spacing:.012em;word-spacing:.12em;
+}
+.para{margin:0 0 1.6em}
+.s{
+  padding:.14em .08em;margin-right:.3em;border-radius:.28em;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+}
+.s.cur{background:var(--sent)}
+.w{border-radius:.2em;padding:.03em .05em;cursor:pointer}
+.w:hover{outline:2px dotted #666}
+.w.cur{background:var(--word);box-shadow:0 0 0 .07em var(--word-edge);color:#000}
+
+#controls{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  background:var(--bar);border-top:3px solid var(--line);
+  padding:10px 12px 12px;display:flex;flex-direction:column;gap:10px;align-items:center;
+}
+#nav{display:flex;gap:8px;direction:ltr;flex-wrap:wrap;justify-content:center;align-items:stretch}
+#tools{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:center}
+.speed{display:flex;gap:8px;align-items:center;font-weight:700;font-size:20px}
+#rateVal{min-width:3.2em;text-align:center;font-size:24px;direction:ltr}
+
+/* ---------- הגדרות ---------- */
+#settings{
+  position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.35);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+}
+#settingsBox{
+  background:#fffdf6;border:3px solid var(--line);border-radius:16px;
+  width:min(640px,100%);max-height:92vh;overflow:auto;padding:22px;
+}
+#settingsBox h2{margin:0 0 16px;font-size:28px}
+#settingsBox label{display:block;font-weight:700;font-size:21px;margin:18px 0 6px}
+#voiceSel{width:100%;font-size:21px;padding:12px;border:3px solid var(--line);border-radius:12px;background:#fff;direction:ltr}
+#voiceNote{font-size:18px;margin:8px 0 0}
+.sizeRow{display:flex;gap:12px;align-items:center}
+#sizeVal{font-size:24px;min-width:4em;text-align:center;font-weight:700}
+
+#dict{
+  position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.35);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+}
+#dictBox{
+  background:#fffdf6;border:3px solid var(--line);border-radius:16px;
+  width:min(640px,100%);max-height:92vh;overflow:auto;padding:22px;
+}
+#dictWord{font-size:44px;font-weight:700;margin:0 0 10px;text-align:left;word-break:break-word}
+#dictHe{font-size:36px;line-height:1.5;min-height:3em;margin:0 0 14px}
+#dictHe .alt{font-size:28px;margin-top:6px}
+
+#toast{
+  position:fixed;left:50%;top:84px;transform:translateX(-50%);z-index:60;
+  background:#111;color:#fff;padding:14px 22px;border-radius:12px;font-size:21px;max-width:92vw;text-align:center;
+}
+
+@media (max-width:640px){
+  .btn{min-width:50px;min-height:58px;font-size:15px;padding:4px 6px}
+  .btn.wide{padding:4px 14px}
+  #page{padding:22px 14px 300px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .s{transition:background .15s}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ מסך הדבקה ============ -->
+<main id="editView" hidden>
+  <h1>הדביקי כאן טקסט באנגלית</h1>
+  <p class="sub">אפשר להדביק מ-Word או מאתר. אין הגבלה על האורך.</p>
+  <textarea id="src" lang="en" dir="ltr" spellcheck="false" aria-label="תיבת טקסט באנגלית" placeholder="Paste your English text here…"></textarea>
+  <div class="row">
+    <button class="btn wide primary" id="startBtn" type="button">התחילי לקרוא</button>
+    <button class="btn wide" id="clearBtn" type="button">ניקוי</button>
+    <button class="btn wide" id="backBtn" type="button" hidden>חזרה לטקסט הקודם</button>
+    <span id="count" aria-live="polite"></span>
+  </div>
+</main>
+
+<!-- ============ מסך הקריאה ============ -->
+<section id="readView" hidden>
+  <div id="topbar">
+    <button class="btn small wide" id="newBtn" type="button">טקסט חדש</button>
+    <button class="btn small wide" id="setBtn" type="button">הגדרות</button>
+    <span class="spacer"></span>
+    <span id="where" aria-live="off"></span>
+    <div id="prog"><div id="progFill"></div></div>
+  </div>
+
+  <div id="page"><div id="text" lang="en"></div></div>
+
+  <div id="controls">
+    <div id="nav">
+      <button class="btn flip" id="pPrev" type="button" aria-label="פסקה אחורה">
+        <svg viewBox="0 0 24 24"><path d="M3 5l11 7-11 7z"/><rect x="17" y="5" width="3.5" height="14"/></svg>פסקה</button>
+      <button class="btn flip" id="sPrev" type="button" aria-label="משפט אחורה">
+        <svg viewBox="0 0 24 24"><path d="M3 5l9 7-9 7zM12 5l9 7-9 7z"/></svg>משפט</button>
+      <button class="btn flip" id="wPrev" type="button" aria-label="מילה אחורה">
+        <svg viewBox="0 0 24 24"><path d="M7 4l12 8-12 8z"/></svg>מילה</button>
+
+      <button class="btn wide primary" id="playBtn" type="button" aria-label="הפעלה">
+        <svg id="icPlay" viewBox="0 0 24 24"><path d="M7 4l12 8-12 8z"/></svg>
+        <svg id="icPause" viewBox="0 0 24 24" hidden><rect x="6" y="4" width="4.5" height="16"/><rect x="13.5" y="4" width="4.5" height="16"/></svg>
+        <span id="playTxt">הפעלה</span></button>
+
+      <button class="btn" id="wNext" type="button" aria-label="מילה קדימה">
+        <svg viewBox="0 0 24 24"><path d="M7 4l12 8-12 8z"/></svg>מילה</button>
+      <button class="btn" id="sNext" type="button" aria-label="משפט קדימה">
+        <svg viewBox="0 0 24 24"><path d="M3 5l9 7-9 7zM12 5l9 7-9 7z"/></svg>משפט</button>
+      <button class="btn" id="pNext" type="button" aria-label="פסקה קדימה">
+        <svg viewBox="0 0 24 24"><path d="M3 5l11 7-11 7z"/><rect x="17" y="5" width="3.5" height="14"/></svg>פסקה</button>
+    </div>
+    <div id="tools">
+      <div class="speed">
+        <span>מהירות</span>
+        <button class="btn small" id="rateDown" type="button" aria-label="לאט יותר">−</button>
+        <span id="rateVal" aria-live="polite">0.65</span>
+        <button class="btn small" id="rateUp" type="button" aria-label="מהר יותר">+</button>
+      </div>
+      <div class="speed">
+        <span>סנכרון</span>
+        <button class="btn small" id="leadDown" type="button" aria-label="להקדים פחות את הסימון">−</button>
+        <span id="leadVal" aria-live="polite">2</span>
+        <button class="btn small" id="leadUp" type="button" aria-label="להקדים יותר את הסימון">+</button>
+      </div>
+      <button class="btn small wide" id="dictBtn" type="button">מילון</button>
+      <button class="btn small wide" id="restartBtn" type="button">מההתחלה</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ הגדרות ============ -->
+<div id="settings" hidden role="dialog" aria-modal="true" aria-label="הגדרות">
+  <div id="settingsBox">
+    <h2>הגדרות</h2>
+    <label for="voiceSel">קול</label>
+    <select id="voiceSel"></select>
+    <p id="voiceNote"></p>
+    <div class="row"><button class="btn small wide" id="testBtn" type="button">שמעי דוגמה</button></div>
+
+    <label>גודל הטקסט</label>
+    <div class="sizeRow">
+      <button class="btn small" id="sizeDown" type="button" aria-label="הקטנה">A−</button>
+      <span id="sizeVal"></span>
+      <button class="btn small" id="sizeUp" type="button" aria-label="הגדלה">A+</button>
+    </div>
+
+    <div class="row"><button class="btn wide primary" id="closeSet" type="button">סגירה</button></div>
+  </div>
+</div>
+
+<!-- ============ מילון ============ -->
+<div id="dict" hidden role="dialog" aria-modal="true" aria-label="מילון">
+  <div id="dictBox">
+    <div id="dictWord" lang="en" dir="ltr"></div>
+    <div id="dictHe" lang="he" dir="rtl" aria-live="polite"></div>
+    <div class="row">
+      <button class="btn small wide" id="dictSay" type="button">שמעי את המילה</button>
+      <a class="btn small wide" id="dictGoogle" href="#" target="_blank" rel="noopener" style="text-decoration:none">פתיחה ב-Google Translate</a>
+      <button class="btn wide primary" id="dictClose" type="button">סגירה</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" hidden role="status"></div>
+
+<script>
+(() => {
+'use strict';
+
+const $ = s => document.querySelector(s);
+const synth = window.speechSynthesis;
+
+const store = {
+  get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : v; } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem(k, v); return true; } catch(e){ return false; } },
+  del(k){ try { localStorage.removeItem(k); } catch(e){} }
+};
+
+/* ---------------- מצב ---------------- */
+let words = [], sentences = [], paras = [];
+let cur = 0, curWordEl = null, curSentEl = null, curSent = -1;
+let playing = false, finished = false;
+let gen = 0;                       // מזהה דור: מתעלם מאירועים ישנים של הקראה שבוטלה
+let rate = clamp(parseFloat(store.get('tts.rate65', '0.65')) || 0.65, 0.3, 2);
+let lead = clamp(parseInt(store.get('tts.lead', '2'), 10), 0, 6);   // כמה מילים להקדים את הסימון, כי הקול "מאחר" לדווח איפה הוא
+if (isNaN(lead)) lead = 2;
+const dictCache = {};
+let fontSize = clamp(parseInt(store.get('tts.size', '32'), 10) || 32, 20, 72);
+let voices = [], voice = null;
+const voiceHasBoundary = {};
+let cpsMap = {};
+try { cpsMap = JSON.parse(store.get('tts.cps', '{}')) || {}; } catch(e){}
+let estTimer = null, fbTimer = null, watchT = null, queueT = null, saveT = null, toastT = null;
+let retries = 0;
+let utterRef = null;               // מחזיקים הפניה כדי ש-Chrome לא ימחק את ההקראה
+
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+/* ---------------- פירוק הטקסט ---------------- */
+const TITLES = new Set(['mr','mrs','ms','dr','prof','sr','jr','st','vs','mt','fig','no','gen','gov','hon','rev','sen','rep','lt','col','sgt','capt','cf','inc','ltd','co','dept','approx']);
+const END_RE = /[.!?…]+["'”’)\]]*$/;
+
+function isSentenceEnd(tok, next){
+  if (!END_RE.test(tok)) return false;
+  const bare = tok.replace(/["'”’)\]]+$/, '');
+  const core = bare.replace(/^[("'“‘\[]+/, '');
+  if (/^[A-Za-z]\.$/.test(core)) return false;               // ראשי תיבות של שם: J.
+  if (/^([A-Za-z]\.){2,}$/.test(core)) return false;          // U.S.
+  if (TITLES.has(core.replace(/\.$/, '').toLowerCase()) && core.endsWith('.')) return false;
+  if (next && /^[("'“‘\[]*[a-z]/.test(next)) return false;    // המילה הבאה באות קטנה
+  return true;
+}
+
+function parse(text){
+  words = []; sentences = []; paras = [];
+  const clean = text.replace(/[​-‏‪-‮﻿­]/g, '').replace(/\r/g, '');
+  for (const line of clean.split(/\n+/)){
+    const toks = line.trim().split(/\s+/).filter(Boolean);
+    if (!toks.length) continue;
+    const pIdx = paras.length;
+    const para = { first: words.length, last: 0, el: null };
+    let sFirst = words.length, count = 0;
+    for (let k = 0; k < toks.length; k++){
+      const tok = toks[k];
+      words.push({ t: tok, s: sentences.length, p: pIdx, el: null });
+      count++;
+      let end = false;
+      if (k === toks.length - 1) end = true;
+      else if (isSentenceEnd(tok, toks[k+1])) end = true;
+      else if (count >= 60 || (count >= 35 && /[,;:]["'”’)\]]*$/.test(tok))) end = true;   // משפט ארוך מאוד נחתך בנקודה טבעית
+      if (end){
+        sentences.push({ first: sFirst, last: words.length - 1, p: pIdx, el: null });
+        sFirst = words.length; count = 0;
+      }
+    }
+    para.last = words.length - 1;
+    paras.push(para);
+  }
+}
+
+function render(){
+  const root = $('#text');
+  root.textContent = '';
+  const frag = document.createDocumentFragment();
+  for (const pa of paras){
+    const p = document.createElement('p');
+    p.className = 'para';
+    const sFrom = words[pa.first].s, sTo = words[pa.last].s;
+    for (let si = sFrom; si <= sTo; si++){
+      const s = sentences[si];
+      const sp = document.createElement('span');
+      sp.className = 's';
+      for (let i = s.first; i <= s.last; i++){
+        const w = document.createElement('span');
+        w.className = 'w';
+        w.dataset.i = i;
+        w.textContent = words[i].t;
+        words[i].el = w;
+        sp.appendChild(w);
+        if (i < s.last) sp.appendChild(document.createTextNode(' '));
+      }
+      s.el = sp;
+      p.appendChild(sp);
+      p.appendChild(document.createTextNode(' '));
+    }
+    pa.el = p;
+    frag.appendChild(p);
+  }
+  root.appendChild(frag);
+  curWordEl = null; curSentEl = null; curSent = -1;
+}
+
+/* ---------------- הדגשה ומיקום ---------------- */
+function setCur(i, opts){
+  if (!words.length) return;
+  i = clamp(i, 0, words.length - 1);
+  const w = words[i];
+  if (i !== cur || !curWordEl){
+    if (curWordEl) curWordEl.classList.remove('cur');
+    w.el.classList.add('cur');
+    curWordEl = w.el;
+    cur = i;
+  }
+  if (w.s !== curSent || !curSentEl){
+    if (curSentEl) curSentEl.classList.remove('cur');
+    sentences[w.s].el.classList.add('cur');
+    curSentEl = sentences[w.s].el;
+    curSent = w.s;
+  }
+  updateProgress();
+  if (!(opts && opts.noScroll)) follow(w.el);
+  savePosSoon();
+}
+
+function controlsHeight(){ return $('#controls').offsetHeight; }
+
+function follow(el, instant){
+  const r = el.getBoundingClientRect();
+  const vh = window.innerHeight;
+  const usable = vh - controlsHeight();
+  const topLimit = 90 + 10;
+  const bottomLimit = usable * 0.72;
+  if (instant || r.top < topLimit || r.bottom > bottomLimit){
+    const target = usable * 0.36;
+    const delta = r.top - target;
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollBy({ top: delta, behavior: (instant || calm) ? 'auto' : 'smooth' });
+  }
+}
+
+function updateProgress(){
+  const n = words.length;
+  $('#where').textContent = 'מילה ' + (cur + 1) + ' מתוך ' + n;
+  $('#progFill').style.width = (n > 1 ? (cur / (n - 1)) * 100 : 100) + '%';
+}
+
+function savePosSoon(){
+  clearTimeout(saveT);
+  saveT = setTimeout(() => store.set('tts.pos', String(cur)), 400);
+}
+
+/* ---------------- קולות ---------------- */
+function voiceScore(v){
+  const n = v.name, lang = (v.lang || '').replace('_', '-');
+  let s = 30;
+  if (/natural|neural/i.test(n)) s = 100;
+  else if (/online/i.test(n)) s = 90;
+  else if (/google uk english female/i.test(n)) s = 72;
+  else if (/google us english/i.test(n)) s = 70;
+  else if (/google uk english male/i.test(n)) s = 66;
+  else if (/google/i.test(n)) s = 60;
+  else if (/premium|enhanced/i.test(n)) s = 75;
+  else if (/samantha|daniel|karen|moira|serena|ava|allison|tessa|alex|kate|oliver/i.test(n)) s = 55;
+  else if (/zira|hazel/i.test(n)) s = 45;
+  else if (/david|mark|susan|george|james|richard/i.test(n)) s = 40;
+  else if (/espeak/i.test(n)) s = 10;
+  if (/^en-(US|GB)$/i.test(lang)) s += 3;
+  return s;
+}
+
+function loadVoices(){
+  if (!synth) return;
+  const all = synth.getVoices().filter(v => /^en/i.test((v.lang || '').replace('_', '-')));
+  if (!all.length) return;
+  all.sort((a, b) => voiceScore(b) - voiceScore(a));
+  voices = all;
+  const sel = $('#voiceSel');
+  sel.textContent = '';
+  voices.forEach((v, i) => {
+    const o = document.createElement('option');
+    o.value = v.name;
+    o.textContent = v.name + (i === 0 ? '   ← מומלץ' : '');
+    sel.appendChild(o);
+  });
+  const saved = store.get('tts.voice', '');
+  const keep = voice && voices.find(v => v.name === voice.name);
+  voice = keep || voices.find(v => v.name === saved) || voices[0];
+  sel.value = voice.name;
+  updateVoiceNote();
+}
+
+function updateVoiceNote(){
+  if (!voice){ $('#voiceNote').textContent = ''; return; }
+  const k = voiceHasBoundary[voice.name];
+  let t;
+  if (k === true) t = 'בקול הזה ההדגשה של המילה מדויקת.';
+  else if (k === false) t = 'בקול הזה ההדגשה של המילה מוערכת לפי קצב הדיבור, ויישור הקו מתחדש בכל משפט.';
+  else t = 'הדגשת המילה תתכוונן אוטומטית לפי הקול.';
+  $('#voiceNote').textContent = t;
+}
+
+/* ---------------- הקראה ---------------- */
+function halt(){
+  gen++;
+  clearInterval(estTimer); estTimer = null;
+  clearTimeout(fbTimer); clearTimeout(watchT);
+  try { synth.cancel(); } catch(e){}
+}
+
+function getCps(){ return cpsMap[voice ? voice.name : ''] || 14.5; }
+
+function speakFrom(idx){
+  halt();
+  clearTimeout(queueT);
+  if (idx >= words.length){ finish(); return; }
+  setCur(idx);
+  const my = gen;
+  const s = sentences[words[idx].s];
+
+  // בונים את הטקסט להקראה, ושומרים איפה מתחילה כל מילה
+  let text = '';
+  const offs = [];
+  for (let i = idx; i <= s.last; i++){
+    if (i > idx) text += ' ';
+    offs.push(text.length);
+    const t = words[i].t;
+    text += /[A-Za-z0-9À-ɏ]/.test(t) ? t : ',';
+  }
+
+  try { if (synth.paused) synth.resume(); } catch(e){}
+  const u = new SpeechSynthesisUtterance(text);
+  utterRef = u;
+  if (voice){ u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
+  u.rate = rate; u.pitch = 1; u.volume = 1;
+
+  let started = false, gotBoundary = false, tStart = 0;
+
+  function idxFromChar(c){
+    let lo = 0, hi = offs.length - 1;
+    while (lo < hi){
+      const mid = (lo + hi + 1) >> 1;
+      if (offs[mid] <= c) lo = mid; else hi = mid - 1;
+    }
+    return lo;
+  }
+
+  function startEstimate(){
+    if (my !== gen || gotBoundary) return;
+    if (voice) { voiceHasBoundary[voice.name] = false; updateVoiceNote(); }
+    clearInterval(estTimer);
+    const n = offs.length;
+    const cum = [];
+    let total = 0;
+    for (let k = 0; k < n; k++){
+      const t = words[idx + k].t;
+      cum.push(total);
+      total += t.length + 1.2 + (/[,;:]["'”’)\]]*$/.test(t) ? 3 : 0) + (END_RE.test(t) ? 4 : 0);
+    }
+    const dur = (text.length / (getCps() * rate)) * 1000;
+    let k = 0;
+    estTimer = setInterval(() => {
+      if (my !== gen){ clearInterval(estTimer); return; }
+      const el = performance.now() - tStart;
+      const pos = (el / dur) * total;
+      while (k < n - 1 && cum[k + 1] <= pos) k++;
+      const t = clamp(idx + k + lead, idx, s.last);
+      if (t !== cur) setCur(t);
+    }, 40);
+  }
+
+  u.onstart = () => {
+    if (my !== gen) return;
+    started = true; retries = 0;
+    clearTimeout(watchT);
+    tStart = performance.now();
+    if (voice && voiceHasBoundary[voice.name] === false) startEstimate();
+    else if (voice && voiceHasBoundary[voice.name] === undefined && !voice.localService) startEstimate();
+    else fbTimer = setTimeout(startEstimate, 700);
+  };
+
+  u.onboundary = e => {
+    if (my !== gen) return;
+    if (e.name && e.name !== 'word') return;
+    if (!gotBoundary){
+      gotBoundary = true;
+      clearInterval(estTimer); estTimer = null; clearTimeout(fbTimer);
+      if (voice){ voiceHasBoundary[voice.name] = true; updateVoiceNote(); }
+    }
+    const k = idxFromChar(e.charIndex || 0);
+    const t = clamp(idx + k + lead, idx, s.last);
+    if (t !== cur) setCur(t);
+  };
+
+  u.onend = () => {
+    if (my !== gen) return;
+    // לומדים כמה מהר הקול באמת מדבר, כדי שההערכה תהיה מדויקת יותר
+    if (!gotBoundary && started && text.length > 40 && voice){
+      const secs = (performance.now() - tStart) / 1000;
+      if (secs > 0.5){
+        const measured = text.length / secs / rate;
+        if (measured > 5 && measured < 40){
+          const old = cpsMap[voice.name];
+          cpsMap[voice.name] = old ? old * 0.7 + measured * 0.3 : measured;
+          store.set('tts.cps', JSON.stringify(cpsMap));
+        }
+      }
+    }
+    if (!playing) return;
+    speakFrom(s.last + 1);
+  };
+
+  u.onerror = e => {
+    if (my !== gen) return;
+    if (e.error === 'interrupted' || e.error === 'canceled') return;
+    const local = voices.find(v => v.localService);
+    if (voice && !voice.localService && local){
+      voice = local;
+      $('#voiceSel').value = voice.name;
+      store.set('tts.voice', voice.name);
+      updateVoiceNote();
+      toast('הקול הקודם לא הגיב, עברתי לקול אחר שנמצא במחשב.');
+      speakFrom(idx);
+      return;
+    }
+    pause();
+    toast('ההקראה נעצרה. אפשר לנסות קול אחר בהגדרות.');
+  };
+
+  // אם ההקראה לא התחילה תוך כמה שניות, מנסים שוב
+  watchT = setTimeout(() => {
+    if (my !== gen || started) return;
+    if (retries < 2){ retries++; speakFrom(idx); }
+    else { pause(); toast('הקול לא מתחיל. אפשר לנסות קול אחר בהגדרות.'); }
+  }, 5000);
+
+  synth.speak(u);
+}
+
+function finish(){
+  playing = false; finished = true;
+  halt();
+  updatePlayBtn();
+  toast('סיימנו את הטקסט.');
+}
+
+function play(){
+  if (!words.length) return;
+  if (!synth){ toast('הדפדפן הזה לא תומך בהקראה. כדאי לפתוח ב-Chrome.'); return; }
+  if (finished){ finished = false; setCur(0); }
+  playing = true; retries = 0;
+  updatePlayBtn();
+  speakFrom(cur);
+}
+
+function pause(){
+  playing = false;
+  clearTimeout(queueT);
+  halt();
+  updatePlayBtn();
+  store.set('tts.pos', String(cur));
+}
+
+function toggle(){ playing ? pause() : play(); }
+
+function updatePlayBtn(){
+  $('#icPlay').toggleAttribute('hidden', playing);
+  $('#icPause').toggleAttribute('hidden', !playing);
+  $('#playTxt').textContent = playing ? 'עצירה' : 'הפעלה';
+  $('#playBtn').setAttribute('aria-label', playing ? 'עצירה' : 'הפעלה');
+}
+
+/* ---------------- ניווט ---------------- */
+function go(i){
+  if (!words.length) return;
+  i = clamp(i, 0, words.length - 1);
+  finished = false;
+  if (playing){
+    halt();
+    setCur(i);
+    clearTimeout(queueT);
+    queueT = setTimeout(() => { if (playing) speakFrom(cur); }, 220);
+  } else {
+    setCur(i);
+  }
+}
+
+const wordNext = () => go(cur + 1);
+const wordPrev = () => go(cur - 1);
+function sentNext(){
+  const s = sentences[words[cur].s];
+  go(s.last + 1 >= words.length ? cur : s.last + 1);
+}
+function sentPrev(){
+  const si = words[cur].s, s = sentences[si];
+  if (cur > s.first + 1 || si === 0) go(s.first);
+  else go(sentences[si - 1].first);
+}
+function paraNext(){
+  const p = paras[words[cur].p];
+  go(p.last + 1 >= words.length ? cur : p.last + 1);
+}
+function paraPrev(){
+  const pi = words[cur].p, p = paras[pi];
+  if (cur > p.first + 1 || pi === 0) go(p.first);
+  else go(paras[pi - 1].first);
+}
+
+function setRate(r){
+  rate = Math.round(clamp(r, 0.3, 2) * 100) / 100;
+  $('#rateVal').textContent = rate.toFixed(2);
+  store.set('tts.rate65', String(rate));
+  if (playing){
+    halt();
+    clearTimeout(queueT);
+    queueT = setTimeout(() => { if (playing) speakFrom(cur); }, 250);
+  }
+}
+
+function setLead(n){
+  lead = clamp(n, 0, 6);
+  $('#leadVal').textContent = String(lead);
+  store.set('tts.lead', String(lead));
+}
+
+/* ---------------- מילון ---------------- */
+function cleanWord(t){
+  return t.replace(/^[^A-Za-z0-9À-ɏ]+/, '').replace(/[^A-Za-z0-9À-ɏ]+$/, '')
+          .replace(/[’]s$/i, '').replace(/'s$/i, '');
+}
+
+async function lookup(word){
+  const key = word.toLowerCase();
+  if (dictCache[key]) return dictCache[key];
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 9000);
+  try {
+    const r = await fetch('https://api.mymemory.translated.net/get?langpair=en|he&q=' + encodeURIComponent(key), { signal: ctl.signal });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const j = await r.json();
+    const isHe = s => /[֐-׿]/.test(s || '');
+    const out = [];
+    const add = s => {
+      s = (s || '').trim();
+      if (!isHe(s) || /MYMEMORY|WARNING/i.test(s)) return;
+      if (!out.includes(s)) out.push(s);
+    };
+    add(j.responseData && j.responseData.translatedText);
+    const ms = (j.matches || []).slice().sort((a, b) => (parseFloat(b.match) || 0) - (parseFloat(a.match) || 0));
+    for (const m of ms){
+      if ((m.source || '').toLowerCase().startsWith('en') && (m.segment || '').trim().toLowerCase() === key) add(m.translation);
+      if (out.length >= 3) break;
+    }
+    if (!out.length) throw new Error('empty');
+    dictCache[key] = out.slice(0, 3);
+    return dictCache[key];
+  } finally { clearTimeout(timer); }
+}
+
+let dictWordNow = '';
+async function openDict(){
+  if (!words.length) return;
+  if (playing) pause();
+  const w = cleanWord(words[cur].t);
+  if (!w){ toast('במילה הזאת אין מה לתרגם. אפשר לבחור מילה אחרת.'); return; }
+  dictWordNow = w;
+  $('#dictWord').textContent = w;
+  $('#dictHe').textContent = 'מחפש תרגום…';
+  $('#dictGoogle').href = 'https://translate.google.com/?sl=en&tl=iw&op=translate&text=' + encodeURIComponent(w);
+  $('#dict').hidden = false;
+  $('#dictClose').focus();
+  try {
+    const res = await lookup(w);
+    if (dictWordNow !== w) return;
+    const he = $('#dictHe');
+    he.textContent = '';
+    res.forEach((t, i) => {
+      const d = document.createElement('div');
+      if (i) d.className = 'alt';
+      d.textContent = (i ? 'או: ' : '') + t;
+      he.appendChild(d);
+    });
+  } catch(e){
+    if (dictWordNow !== w) return;
+    $('#dictHe').textContent = 'לא הצלחתי למצוא תרגום עכשיו. אפשר ללחוץ על הכפתור "פתיחה ב-Google Translate", או לנסות שוב בעוד רגע.';
+  }
+}
+
+function sayWord(){
+  if (!synth || !dictWordNow) return;
+  try { synth.cancel(); } catch(e){}
+  const u = new SpeechSynthesisUtterance(dictWordNow);
+  utterRef = u;
+  if (voice){ u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
+  u.rate = Math.min(rate, 0.8);
+  synth.speak(u);
+}
+
+function setFont(px){
+  fontSize = clamp(px, 20, 72);
+  document.documentElement.style.setProperty('--fs', fontSize + 'px');
+  $('#sizeVal').textContent = fontSize + ' px';
+  store.set('tts.size', String(fontSize));
+  if (curWordEl) setTimeout(() => follow(curWordEl, true), 30);
+}
+
+/* ---------------- מסכים ---------------- */
+function showEdit(){
+  pause();
+  $('#readView').hidden = true;
+  $('#editView').hidden = false;
+  $('#src').value = '';
+  $('#backBtn').hidden = !words.length;
+  updateCount();
+  $('#src').focus();
+  window.scrollTo(0, 0);
+}
+
+function openRead(text, pos, instant){
+  parse(text);
+  if (!words.length){ toast('לא נמצא טקסט. אפשר להדביק שוב.'); return false; }
+  render();
+  $('#editView').hidden = true;
+  $('#readView').hidden = false;
+  playing = false; finished = false;
+  updatePlayBtn();
+  cur = 0;
+  setCur(clamp(pos || 0, 0, words.length - 1), { noScroll: true });
+  window.scrollTo(0, 0);
+  requestAnimationFrame(() => { if (pos) follow(curWordEl, true); });
+  return true;
+}
+
+function updateCount(){
+  const t = $('#src').value.trim();
+  $('#count').textContent = t ? (t.split(/\s+/).length.toLocaleString('he-IL') + ' מילים') : '';
+}
+
+let countT = null;
+function toast(msg){
+  const el = $('#toast');
+  el.textContent = msg;
+  el.hidden = false;
+  clearTimeout(toastT);
+  toastT = setTimeout(() => { el.hidden = true; }, 4500);
+}
+
+/* ---------------- חיבור אירועים ---------------- */
+$('#src').addEventListener('input', () => { clearTimeout(countT); countT = setTimeout(updateCount, 250); });
+
+$('#startBtn').addEventListener('click', () => {
+  const t = $('#src').value;
+  if (!t.trim()){ toast('כדאי להדביק קודם טקסט.'); $('#src').focus(); return; }
+  if (openRead(t, 0)){
+    if (!store.set('tts.text', t)){
+      store.del('tts.text');
+      toast('הטקסט ארוך מדי לשמירה לפעם הבאה, אבל הוא עובד כרגיל עכשיו.');
+    }
+    store.set('tts.pos', '0');
+  }
+});
+$('#clearBtn').addEventListener('click', () => { $('#src').value = ''; updateCount(); $('#src').focus(); });
+$('#backBtn').addEventListener('click', () => {
+  $('#editView').hidden = true;
+  $('#readView').hidden = false;
+  if (curWordEl) follow(curWordEl, true);
+});
+$('#newBtn').addEventListener('click', showEdit);
+
+$('#playBtn').addEventListener('click', toggle);
+$('#wNext').addEventListener('click', wordNext);
+$('#wPrev').addEventListener('click', wordPrev);
+$('#sNext').addEventListener('click', sentNext);
+$('#sPrev').addEventListener('click', sentPrev);
+$('#pNext').addEventListener('click', paraNext);
+$('#pPrev').addEventListener('click', paraPrev);
+$('#rateDown').addEventListener('click', () => setRate(rate - 0.05));
+$('#rateUp').addEventListener('click', () => setRate(rate + 0.05));
+$('#restartBtn').addEventListener('click', () => go(0));
+$('#leadDown').addEventListener('click', () => setLead(lead - 1));
+$('#leadUp').addEventListener('click', () => setLead(lead + 1));
+$('#dictBtn').addEventListener('click', openDict);
+$('#dictClose').addEventListener('click', () => { $('#dict').hidden = true; });
+$('#dictSay').addEventListener('click', sayWord);
+$('#dict').addEventListener('click', e => { if (e.target.id === 'dict') $('#dict').hidden = true; });
+
+// לחיצה על מילה מעבירה אליה את המיקום
+$('#text').addEventListener('click', e => {
+  const w = e.target.closest('.w');
+  if (!w) return;
+  if (String(window.getSelection()).length) return;
+  go(parseInt(w.dataset.i, 10));
+});
+
+// הגדרות
+$('#setBtn').addEventListener('click', () => { $('#settings').hidden = false; $('#closeSet').focus(); });
+$('#closeSet').addEventListener('click', () => { $('#settings').hidden = true; });
+$('#settings').addEventListener('click', e => { if (e.target.id === 'settings') $('#settings').hidden = true; });
+$('#voiceSel').addEventListener('change', e => {
+  voice = voices.find(v => v.name === e.target.value) || voice;
+  store.set('tts.voice', voice.name);
+  updateVoiceNote();
+  if (playing){ halt(); speakFrom(cur); }
+});
+$('#sizeDown').addEventListener('click', () => setFont(fontSize - 2));
+$('#sizeUp').addEventListener('click', () => setFont(fontSize + 2));
+$('#testBtn').addEventListener('click', () => {
+  if (!synth) return;
+  if (playing) pause();
+  halt();
+  const u = new SpeechSynthesisUtterance('Hello. This is how I sound at this speed.');
+  utterRef = u;
+  if (voice){ u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
+  u.rate = rate;
+  synth.speak(u);
+});
+
+// מקלדת
+document.addEventListener('keydown', e => {
+  if ($('#readView').hidden) {
+    if ($('#editView').hidden === false && e.ctrlKey && e.key === 'Enter') $('#startBtn').click();
+    return;
+  }
+  if (!$('#settings').hidden){ if (e.key === 'Escape') $('#settings').hidden = true; return; }
+  if (!$('#dict').hidden){ if (e.key === 'Escape') $('#dict').hidden = true; return; }
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'textarea' || tag === 'input' || tag === 'select') return;
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  switch (e.key){
+    case ' ': if (tag === 'button') return; e.preventDefault(); toggle(); break;
+    case 'ArrowRight': e.preventDefault(); wordNext(); break;
+    case 'ArrowLeft':  e.preventDefault(); wordPrev(); break;
+    case 'ArrowDown':  e.preventDefault(); sentNext(); break;
+    case 'ArrowUp':    e.preventDefault(); sentPrev(); break;
+    case 'PageDown':   e.preventDefault(); paraNext(); break;
+    case 'PageUp':     e.preventDefault(); paraPrev(); break;
+  }
+});
+
+window.addEventListener('beforeunload', () => {
+  store.set('tts.pos', String(cur));
+  try { synth.cancel(); } catch(e){}
+});
+
+/* ---------------- התחלה ---------------- */
+$('#rateVal').textContent = rate.toFixed(2);
+$('#leadVal').textContent = String(lead);
+setFont(fontSize);
+
+if (!synth){
+  toast('הדפדפן הזה לא תומך בהקראה. כדאי לפתוח את הקובץ ב-Chrome.');
+} else {
+  loadVoices();
+  synth.onvoiceschanged = loadVoices;
+  setTimeout(loadVoices, 600);
+  setTimeout(loadVoices, 1800);
+}
+
+const savedText = store.get('tts.text', '');
+if (savedText.trim()) {
+  if (!openRead(savedText, parseInt(store.get('tts.pos', '0'), 10) || 0)) showEdit();
+} else {
+  $('#editView').hidden = false;
+  $('#src').focus();
+}
+
+// לבדיקות
+window.__tts = {
+  get words(){ return words; }, get sentences(){ return sentences; }, get paras(){ return paras; },
+  get cur(){ return cur; }, get playing(){ return playing; }, get rate(){ return rate; },
+  parse, openRead
+};
+})();
+</script>
+</body>
+</html>
