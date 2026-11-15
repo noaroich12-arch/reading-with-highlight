@@ -119,7 +119,14 @@ html.reading,html.reading body{height:100%;overflow:hidden;overscroll-behavior:n
 }
 #dictWord{font-size:44px;font-weight:700;margin:0 0 10px;text-align:left;word-break:break-word}
 #dictHe{font-size:36px;line-height:1.5;min-height:3em;margin:0 0 14px}
-#dictHe .alt{font-size:28px;margin-top:6px}
+#dictHe .alt{font-size:28px;line-height:1.45;margin-top:8px}
+#dictHe .dw{display:inline-block;border:2px solid #555;border-radius:10px;background:#fff;padding:0 .4em;margin:4px 0 4px .5em}
+/* שורת הכפתורים נשארת צמודה לתחתית החלון, כדי ש"סגירה" תמיד נראית גם כשיש הרבה משמעויות */
+#dictBox{padding-bottom:0!important}
+#dictBox .row{position:sticky;bottom:0;z-index:1;background:#fffdf6;margin-top:6px;padding:10px 0 14px}
+#dictSay{order:1}
+#dictClose{order:2}
+#dictGoogle{order:3}
 
 #toast{
   position:fixed;left:50%;top:84px;transform:translateX(-50%);z-index:60;
@@ -741,32 +748,49 @@ function cleanWord(t){
           .replace(/[’]s$/i, '').replace(/'s$/i, '');
 }
 
+/* המילון: Google Translate, תרגום ראשי + משמעויות לפי סוג מילה (עם ניקוד, כמו שהוא נותן, כי בלי ניקוד נוצרות מילים בכתיב שגוי).
+   המקור הקודם (MyMemory, מאגר שכל אחד מוסיף לו) נתן "לא מושלם" למילה perfectly, ולכן הוסר גם כגיבוי:
+   תרגום הפוך גרוע מלא להציג תרגום. אם Google לא עונה, מוצגת הודעה עם כפתור לפתיחה ב-Google Translate. */
+const NIQQUD_RE = /[\u0591-\u05C7]/g;
+const isHe = s => /[\u0590-\u05FF]/.test(s || '');
+const heClean = s => (s || '').replace(/\s+/g, ' ').trim();
+const heKey = s => s.replace(NIQQUD_RE, '');
+const POS_HE = { noun: 'שם עצם', verb: 'פועל', adjective: 'תואר', adverb: 'תואר הפועל', conjunction: 'מילת חיבור',
+  preposition: 'מילת יחס', pronoun: 'כינוי', interjection: 'מילת קריאה', article: 'סוג מילה', abbreviation: 'ראשי תיבות' };
+
+async function fetchJson(url, ms){
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), ms);
+  try {
+    const r = await fetch(url, { signal: ctl.signal });
+    if (!r.ok) throw new Error('http ' + r.status);
+    return await r.json();
+  } finally { clearTimeout(timer); }
+}
+
 async function lookup(word){
   const key = word.toLowerCase();
   if (dictCache[key]) return dictCache[key];
-  const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), 9000);
-  try {
-    const r = await fetch('https://api.mymemory.translated.net/get?langpair=en|he&q=' + encodeURIComponent(key), { signal: ctl.signal });
-    if (!r.ok) throw new Error('http ' + r.status);
-    const j = await r.json();
-    const isHe = s => /[֐-׿]/.test(s || '');
-    const out = [];
-    const add = s => {
-      s = (s || '').trim();
-      if (!isHe(s) || /MYMEMORY|WARNING/i.test(s)) return;
-      if (!out.includes(s)) out.push(s);
-    };
-    add(j.responseData && j.responseData.translatedText);
-    const ms = (j.matches || []).slice().sort((a, b) => (parseFloat(b.match) || 0) - (parseFloat(a.match) || 0));
-    for (const m of ms){
-      if ((m.source || '').toLowerCase().startsWith('en') && (m.segment || '').trim().toLowerCase() === key) add(m.translation);
-      if (out.length >= 3) break;
+  const j = await fetchJson('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=iw&dt=t&dt=bd&q=' + encodeURIComponent(key), 9000);
+  const main = heClean(Array.isArray(j[0]) ? j[0].map(p => (p && p[0]) || '').join('') : '');
+  if (!isHe(main)) throw new Error('empty');
+  const seen = new Set([heKey(main)]);
+  const groups = [];
+  for (const pos of (Array.isArray(j[1]) ? j[1] : [])){
+    if (groups.length >= 3) break;
+    const entries = Array.isArray(pos[2]) ? pos[2].map(x => x && x[0]) : (pos[1] || []);
+    const words = [];
+    for (const e of entries){
+      const t = heClean(e);
+      if (!isHe(t) || seen.has(heKey(t))) continue;
+      seen.add(heKey(t));
+      words.push(t);
+      if (words.length >= (groups.length ? 2 : 3)) break;
     }
-    if (!out.length) throw new Error('empty');
-    dictCache[key] = out.slice(0, 3);
-    return dictCache[key];
-  } finally { clearTimeout(timer); }
+    if (words.length) groups.push({ label: POS_HE[pos[0]] || (isHe(pos[0]) ? pos[0] : 'עוד'), words });
+  }
+  dictCache[key] = { main, groups };
+  return dictCache[key];
 }
 
 let dictWordNow = '';
@@ -786,10 +810,18 @@ async function openDict(){
     if (dictWordNow !== w) return;
     const he = $('#dictHe');
     he.textContent = '';
-    res.forEach((t, i) => {
+    const main = document.createElement('div');
+    main.textContent = res.main;
+    he.appendChild(main);
+    res.groups.forEach(g => {
       const d = document.createElement('div');
-      if (i) d.className = 'alt';
-      d.textContent = (i ? 'או: ' : '') + t;
+      d.className = 'alt';
+      if (g.label){
+        const b = document.createElement('b');
+        b.textContent = g.label + ': ';
+        d.appendChild(b);
+      }
+      g.words.forEach(t => { const sp = document.createElement('span'); sp.className = 'dw'; sp.textContent = t; d.appendChild(sp); });
       he.appendChild(d);
     });
   } catch(e){
