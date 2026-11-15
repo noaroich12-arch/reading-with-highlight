@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>שומעת וקוראת</title>
 <style>
 :root{
@@ -52,9 +52,14 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:4px sol
 .row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:18px}
 #count{font-size:20px}
 
-/* ---------- מסך הקריאה ---------- */
+/* ---------- מסך הקריאה ----------
+   המסך בנוי כמו אפליקציה: העמוד עצמו לא נגלל. פס עליון, חלון טקסט שנגלל בתוך עצמו, ופקדים למטה.
+   כך שורת הכתובת של הטלפון לא נעלמת וחוזרת (זה מה שגרם לטקסט "לברוח"), והפסים לא צפים מעל הטקסט. */
+html.reading,html.reading body{height:100%;overflow:hidden;overscroll-behavior:none}
+#readView{display:flex;flex-direction:column;height:100vh;height:100dvh;position:relative}
+#readView[hidden]{display:none!important}
 #topbar{
-  position:sticky;top:0;z-index:20;background:var(--bar);border-bottom:3px solid var(--line);
+  flex:0 0 auto;position:relative;z-index:20;background:var(--bar);border-bottom:3px solid var(--line);
   padding:8px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;
 }
 #topbar .spacer{flex:1}
@@ -62,7 +67,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:4px sol
 #prog{position:absolute;left:0;right:0;bottom:-3px;height:5px;background:transparent}
 #progFill{height:100%;width:0;background:var(--accent);margin-right:auto}
 
-#page{padding:34px 24px 260px}
+#page{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:34px 24px 40vh;position:relative}
 #text{
   direction:ltr;text-align:left;
   max-width:32em;margin:0 auto;
@@ -79,7 +84,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:4px sol
 .w.cur{background:var(--word);box-shadow:0 0 0 .07em var(--word-edge);color:#000}
 
 #controls{
-  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  flex:0 0 auto;position:relative;z-index:30;
   background:var(--bar);border-top:3px solid var(--line);
   padding:10px 12px 12px;display:flex;flex-direction:column;gap:10px;align-items:center;
 }
@@ -121,10 +126,62 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:4px sol
   background:#111;color:#fff;padding:14px 22px;border-radius:12px;font-size:21px;max-width:92vw;text-align:center;
 }
 
-@media (max-width:640px){
+#moreBtn{display:none}
+
+/* ---------- טלפון: חלון טקסט גדול, פקדים קטנים בתחתית ---------- */
+@media (max-width:640px), (max-height:520px) and (orientation:landscape){
   .btn{min-width:50px;min-height:58px;font-size:15px;padding:4px 6px}
   .btn.wide{padding:4px 14px}
-  #page{padding:22px 14px 300px}
+
+  #editView{padding:16px 14px 28px}
+  #editView h1{font-size:28px}
+  #editView p.sub{font-size:19px}
+  #src{font-size:22px;min-height:45vh}
+
+  /* שורה אחת למעלה: טקסט חדש, הגדרות, והקטנה והגדלה של הטקסט (כדי שלא צריך לצבוט את המסך) */
+  #topbar{padding:6px 8px;gap:6px;flex-wrap:nowrap}
+  #topbar .btn.small{min-height:48px;font-size:17px;padding:4px 8px;flex:1 1 auto;min-width:0}
+  #topbar .btn.sz{flex:0 0 auto;min-width:48px;font-size:20px;padding:4px 6px}
+  #topbar .spacer,#where{display:none}
+
+  /* שורת כפתורים אחת למטה, והשאר נפתח בלחיצה על "עוד" */
+  #controls{padding:8px 8px calc(8px + env(safe-area-inset-bottom));gap:6px}
+  #nav{flex-wrap:nowrap;gap:5px;width:100%}
+  #nav .btn{flex:1 1 0;min-width:0;min-height:58px;font-size:15px;padding:4px 2px}
+  #nav .btn.wide{flex:1.8 1 0;padding:4px 6px;gap:6px;font-size:17px}
+  #moreBtn{display:flex;flex-direction:row;gap:8px;width:100%;min-height:46px;font-size:17px}
+  /* המגירה נפתחת מעל הפקדים ולא דוחפת ולא מכווצת את חלון הטקסט */
+  #tools{display:none;position:absolute;left:0;right:0;bottom:100%;width:auto;max-height:55vh;overflow:auto;gap:8px 10px;
+    background:var(--bar);border-top:3px solid var(--line);padding:10px 8px;box-shadow:0 -6px 14px rgba(0,0,0,.18)}
+  #controls.open #tools{display:flex}
+  .speed{font-size:18px}
+
+  /* טקסט: שורות קרובות יותר כדי שיותר ממנו ייכנס במסך */
+  #page{padding:14px 14px 40vh}
+  #text{line-height:1.75;word-spacing:.06em;letter-spacing:0}
+  .para{margin:0 0 1.1em}
+
+  #settings,#dict{padding:10px}
+  #settingsBox,#dictBox{max-height:88vh;padding:16px}
+  #dictWord{font-size:36px}
+  #dictHe{font-size:30px}
+  #toast{top:72px}
+}
+/* טלפון על הצד: המסך נמוך מאוד, לכן הפס העליון נגלל יחד עם הטקסט והפקדים בשורה אחת */
+@media (max-height:520px) and (orientation:landscape){
+  #topbar{padding:4px 8px}
+  #topbar .btn.small{min-height:44px}
+  #controls{flex-direction:row;align-items:center;gap:8px;padding:6px 10px calc(6px + env(safe-area-inset-bottom))}
+  #nav{flex:1;width:auto}
+  #nav .btn{min-height:52px}
+  #moreBtn{width:auto;min-width:210px;min-height:52px;flex:0 0 auto}
+  #tools{max-height:62vh;justify-content:center}
+  #page{padding-bottom:30vh}
+}
+@supports (height:100dvh){
+  @media (max-width:640px){
+    #settingsBox,#dictBox{max-height:88dvh}
+  }
 }
 @media (prefers-reduced-motion:no-preference){
   .s{transition:background .15s}
@@ -151,6 +208,8 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:4px sol
   <div id="topbar">
     <button class="btn small wide" id="newBtn" type="button">טקסט חדש</button>
     <button class="btn small wide" id="setBtn" type="button">הגדרות</button>
+    <button class="btn small sz" id="fontDown" type="button" aria-label="הקטנת הטקסט">A−</button>
+    <button class="btn small sz" id="fontUp" type="button" aria-label="הגדלת הטקסט">A+</button>
     <span class="spacer"></span>
     <span id="where" aria-live="off"></span>
     <div id="prog"><div id="progFill"></div></div>
@@ -160,8 +219,6 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:4px sol
 
   <div id="controls">
     <div id="nav">
-      <button class="btn flip" id="pPrev" type="button" aria-label="פסקה אחורה">
-        <svg viewBox="0 0 24 24"><path d="M3 5l11 7-11 7z"/><rect x="17" y="5" width="3.5" height="14"/></svg>פסקה</button>
       <button class="btn flip" id="sPrev" type="button" aria-label="משפט אחורה">
         <svg viewBox="0 0 24 24"><path d="M3 5l9 7-9 7zM12 5l9 7-9 7z"/></svg>משפט</button>
       <button class="btn flip" id="wPrev" type="button" aria-label="מילה אחורה">
@@ -176,10 +233,13 @@ button:focus-visible,select:focus-visible,textarea:focus-visible{outline:4px sol
         <svg viewBox="0 0 24 24"><path d="M7 4l12 8-12 8z"/></svg>מילה</button>
       <button class="btn" id="sNext" type="button" aria-label="משפט קדימה">
         <svg viewBox="0 0 24 24"><path d="M3 5l9 7-9 7zM12 5l9 7-9 7z"/></svg>משפט</button>
+    </div>
+    <button class="btn small wide" id="moreBtn" type="button" aria-expanded="false" aria-controls="tools">מהירות, מילון ועוד ▲</button>
+    <div id="tools">
+      <button class="btn flip" id="pPrev" type="button" aria-label="פסקה אחורה">
+        <svg viewBox="0 0 24 24"><path d="M3 5l11 7-11 7z"/><rect x="17" y="5" width="3.5" height="14"/></svg>פסקה</button>
       <button class="btn" id="pNext" type="button" aria-label="פסקה קדימה">
         <svg viewBox="0 0 24 24"><path d="M3 5l11 7-11 7z"/><rect x="17" y="5" width="3.5" height="14"/></svg>פסקה</button>
-    </div>
-    <div id="tools">
       <div class="speed">
         <span>מהירות</span>
         <button class="btn small" id="rateDown" type="button" aria-label="לאט יותר">−</button>
@@ -362,25 +422,38 @@ function setCur(i, opts){
   savePosSoon();
 }
 
-function controlsHeight(){ return $('#controls').offsetHeight; }
+function setReading(on){ document.documentElement.classList.toggle('reading', !!on); }
 
+let lastFollow = 0, followT = null;
 function follow(el, instant){
+  // לא מתחילים גלילה חדשה בזמן שגלילה רכה עדיין רצה: זה מה שגרם לטקסט "לקפוץ"
+  const now = performance.now();
+  if (!instant && now - lastFollow < 550){
+    clearTimeout(followT);
+    followT = setTimeout(() => { if (curWordEl) follow(curWordEl); }, 570);   // בודקים שוב אחרי שהגלילה נגמרה
+    return;
+  }
+  // הטקסט גולל בתוך החלון שלו (#page), לא בתוך העמוד. החלון הוא בדיוק מה שנשאר בין הפס העליון לפקדים.
+  const pg = $('#page');
+  const pr = pg.getBoundingClientRect();
+  const area = pr.height;
+  if (area < 60) return;
   const r = el.getBoundingClientRect();
-  const vh = window.innerHeight;
-  const usable = vh - controlsHeight();
-  const topLimit = 90 + 10;
-  const bottomLimit = usable * 0.72;
+  const topLimit = pr.top + area * 0.06;
+  const bottomLimit = pr.top + area * 0.80;
   if (instant || r.top < topLimit || r.bottom > bottomLimit){
-    const target = usable * 0.36;
+    lastFollow = now;
+    const target = pr.top + area * 0.28;
     const delta = r.top - target;
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollBy({ top: delta, behavior: (instant || calm) ? 'auto' : 'smooth' });
+    pg.scrollBy({ top: delta, behavior: (instant || calm) ? 'auto' : 'smooth' });
   }
 }
 
 function updateProgress(){
   const n = words.length;
-  $('#where').textContent = 'מילה ' + (cur + 1) + ' מתוך ' + n;
+  const phone = window.matchMedia('(max-width:640px), (max-height:520px) and (orientation:landscape)').matches;
+  $('#where').textContent = phone ? (cur + 1) + ' / ' + n : 'מילה ' + (cur + 1) + ' מתוך ' + n;
   $('#progFill').style.width = (n > 1 ? (cur / (n - 1)) * 100 : 100) + '%';
 }
 
@@ -747,6 +820,7 @@ function setFont(px){
 function showEdit(){
   pause();
   $('#readView').hidden = true;
+  setReading(false);
   $('#editView').hidden = false;
   $('#src').value = '';
   $('#backBtn').hidden = !words.length;
@@ -761,11 +835,13 @@ function openRead(text, pos, instant){
   render();
   $('#editView').hidden = true;
   $('#readView').hidden = false;
+  setReading(true);
   playing = false; finished = false;
   updatePlayBtn();
   cur = 0;
   setCur(clamp(pos || 0, 0, words.length - 1), { noScroll: true });
   window.scrollTo(0, 0);
+  $('#page').scrollTop = 0;
   requestAnimationFrame(() => { if (pos) follow(curWordEl, true); });
   return true;
 }
@@ -802,6 +878,7 @@ $('#clearBtn').addEventListener('click', () => { $('#src').value = ''; updateCou
 $('#backBtn').addEventListener('click', () => {
   $('#editView').hidden = true;
   $('#readView').hidden = false;
+  setReading(true);
   if (curWordEl) follow(curWordEl, true);
 });
 $('#newBtn').addEventListener('click', showEdit);
@@ -818,6 +895,13 @@ $('#rateUp').addEventListener('click', () => setRate(rate + 0.05));
 $('#restartBtn').addEventListener('click', () => go(0));
 $('#leadDown').addEventListener('click', () => setLead(lead - 1));
 $('#leadUp').addEventListener('click', () => setLead(lead + 1));
+$('#moreBtn').addEventListener('click', () => {
+  const c = $('#controls');
+  const open = c.classList.toggle('open');
+  $('#moreBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+  $('#moreBtn').textContent = open ? 'סגירה ▼' : 'מהירות, מילון ועוד ▲';
+  if (curWordEl) setTimeout(() => follow(curWordEl, true), 30);
+});
 $('#dictBtn').addEventListener('click', openDict);
 $('#dictClose').addEventListener('click', () => { $('#dict').hidden = true; });
 $('#dictSay').addEventListener('click', sayWord);
@@ -843,6 +927,8 @@ $('#voiceSel').addEventListener('change', e => {
 });
 $('#sizeDown').addEventListener('click', () => setFont(fontSize - 2));
 $('#sizeUp').addEventListener('click', () => setFont(fontSize + 2));
+$('#fontDown').addEventListener('click', () => setFont(fontSize - 4));
+$('#fontUp').addEventListener('click', () => setFont(fontSize + 4));
 $('#testBtn').addEventListener('click', () => {
   if (!synth) return;
   if (playing) pause();
