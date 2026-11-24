@@ -1,0 +1,53 @@
+/* screens.css: מסך ההדבקה, מסך הקריאה והפקדים */
+/* ---------- מסך הדבקה ---------- */
+#editView{max-width:1000px;margin:0 auto;padding:28px 20px 40px}
+#editView h1{font-size:34px;margin:0 0 6px}
+#editView p.sub{font-size:21px;margin:0 0 18px}
+#src{
+  width:100%;min-height:55vh;padding:20px;
+  font-size:26px;line-height:1.7;direction:ltr;text-align:left;
+  background:#fff;border:3px solid var(--line);border-radius:14px;resize:vertical;
+}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:18px}
+#count{font-size:20px}
+
+/* ---------- מסך הקריאה ----------
+   המסך בנוי כמו אפליקציה: העמוד עצמו לא נגלל. פס עליון, חלון טקסט שנגלל בתוך עצמו, ופקדים למטה.
+   כך שורת הכתובת של הטלפון לא נעלמת וחוזרת (זה מה שגרם לטקסט "לברוח"), והפסים לא צפים מעל הטקסט. */
+html.reading,html.reading body{height:100%;overflow:hidden;overscroll-behavior:none}
+#readView{display:flex;flex-direction:column;height:100vh;height:100dvh;position:relative}
+#readView[hidden]{display:none!important}
+#topbar{
+  flex:0 0 auto;position:relative;z-index:20;background:var(--bar);border-bottom:3px solid var(--line);
+  padding:8px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+}
+#topbar .spacer{flex:1}
+#where{font-size:19px;font-weight:700}
+#prog{position:absolute;left:0;right:0;bottom:-3px;height:5px;background:transparent}
+#progFill{height:100%;width:0;background:var(--accent);margin-right:auto}
+
+#page{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:34px 24px 40vh;position:relative}
+#text{
+  direction:ltr;text-align:left;
+  max-width:32em;margin:0 auto;
+  font-size:var(--fs);line-height:2.15;letter-spacing:.012em;word-spacing:.12em;
+}
+.para{margin:0 0 1.6em}
+.s{
+  padding:.14em .08em;margin-right:.3em;border-radius:.28em;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+}
+.s.cur{background:var(--sent)}
+.w{border-radius:.2em;padding:.03em .05em;cursor:pointer}
+.w:hover{outline:2px dotted #666}
+.w.cur{background:var(--word);box-shadow:0 0 0 .07em var(--word-edge);color:#000}
+
+#controls{
+  flex:0 0 auto;position:relative;z-index:30;
+  background:var(--bar);border-top:3px solid var(--line);
+  padding:10px 12px 12px;display:flex;flex-direction:column;gap:10px;align-items:center;
+}
+#nav{display:flex;gap:8px;direction:ltr;flex-wrap:wrap;justify-content:center;align-items:stretch}
+#tools{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:center}
+.speed{display:flex;gap:8px;align-items:center;font-weight:700;font-size:20px}
+#rateVal{min-width:3.2em;text-align:center;font-size:24px;direction:ltr}

@@ -1,199 +1,21 @@
 <!doctype html>
-<html lang="he" dir="rtl">
+<html lang="he" dir="rtl" data-site-name="שומעת וקוראת">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://translate.googleapis.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <title>שומעת וקוראת</title>
-<style>
-:root{
-  --fs:32px;
-  --bg:#fffdf6;
-  --ink:#111;
-  --sent:#ffe9a0;
-  --word:#ffa94d;
-  --word-edge:#b45309;
-  --line:#222;
-  --bar:#f1ead6;
-  --accent:#1e3a8a;
-  --focus:#1d4ed8;
-}
-*{box-sizing:border-box}
-html{scroll-padding-bottom:200px}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:1.5}
-[hidden]{display:none!important}
-
-button,select,textarea{font-family:inherit;color:inherit}
-button:focus-visible,select:focus-visible,textarea:focus-visible{outline:4px solid var(--focus);outline-offset:2px}
-
-.btn{
-  min-width:64px;min-height:64px;padding:6px 10px;
-  border:3px solid var(--line);border-radius:14px;background:#fff;color:#111;
-  font-size:17px;font-weight:700;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-}
-.btn:hover{background:#f3f0e4}
-.btn:active{background:#e6e0cc}
-.btn svg{width:26px;height:26px;fill:currentColor;display:block}
-.btn.flip svg{transform:scaleX(-1)}
-.btn.wide{flex-direction:row;gap:10px;min-width:0;padding:6px 22px}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.primary:hover{background:#172e6e}
-.btn.small{min-height:48px;min-width:48px;font-size:18px}
-
-/* ---------- מסך הדבקה ---------- */
-#editView{max-width:1000px;margin:0 auto;padding:28px 20px 40px}
-#editView h1{font-size:34px;margin:0 0 6px}
-#editView p.sub{font-size:21px;margin:0 0 18px}
-#src{
-  width:100%;min-height:55vh;padding:20px;
-  font-size:26px;line-height:1.7;direction:ltr;text-align:left;
-  background:#fff;border:3px solid var(--line);border-radius:14px;resize:vertical;
-}
-.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:18px}
-#count{font-size:20px}
-
-/* ---------- מסך הקריאה ----------
-   המסך בנוי כמו אפליקציה: העמוד עצמו לא נגלל. פס עליון, חלון טקסט שנגלל בתוך עצמו, ופקדים למטה.
-   כך שורת הכתובת של הטלפון לא נעלמת וחוזרת (זה מה שגרם לטקסט "לברוח"), והפסים לא צפים מעל הטקסט. */
-html.reading,html.reading body{height:100%;overflow:hidden;overscroll-behavior:none}
-#readView{display:flex;flex-direction:column;height:100vh;height:100dvh;position:relative}
-#readView[hidden]{display:none!important}
-#topbar{
-  flex:0 0 auto;position:relative;z-index:20;background:var(--bar);border-bottom:3px solid var(--line);
-  padding:8px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;
-}
-#topbar .spacer{flex:1}
-#where{font-size:19px;font-weight:700}
-#prog{position:absolute;left:0;right:0;bottom:-3px;height:5px;background:transparent}
-#progFill{height:100%;width:0;background:var(--accent);margin-right:auto}
-
-#page{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:34px 24px 40vh;position:relative}
-#text{
-  direction:ltr;text-align:left;
-  max-width:32em;margin:0 auto;
-  font-size:var(--fs);line-height:2.15;letter-spacing:.012em;word-spacing:.12em;
-}
-.para{margin:0 0 1.6em}
-.s{
-  padding:.14em .08em;margin-right:.3em;border-radius:.28em;
-  -webkit-box-decoration-break:clone;box-decoration-break:clone;
-}
-.s.cur{background:var(--sent)}
-.w{border-radius:.2em;padding:.03em .05em;cursor:pointer}
-.w:hover{outline:2px dotted #666}
-.w.cur{background:var(--word);box-shadow:0 0 0 .07em var(--word-edge);color:#000}
-
-#controls{
-  flex:0 0 auto;position:relative;z-index:30;
-  background:var(--bar);border-top:3px solid var(--line);
-  padding:10px 12px 12px;display:flex;flex-direction:column;gap:10px;align-items:center;
-}
-#nav{display:flex;gap:8px;direction:ltr;flex-wrap:wrap;justify-content:center;align-items:stretch}
-#tools{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:center}
-.speed{display:flex;gap:8px;align-items:center;font-weight:700;font-size:20px}
-#rateVal{min-width:3.2em;text-align:center;font-size:24px;direction:ltr}
-
-/* ---------- הגדרות ---------- */
-#settings{
-  position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.35);
-  display:flex;align-items:center;justify-content:center;padding:16px;
-}
-#settingsBox{
-  background:#fffdf6;border:3px solid var(--line);border-radius:16px;
-  width:min(640px,100%);max-height:92vh;overflow:auto;padding:22px;
-}
-#settingsBox h2{margin:0 0 16px;font-size:28px}
-#settingsBox label{display:block;font-weight:700;font-size:21px;margin:18px 0 6px}
-#voiceSel{width:100%;font-size:21px;padding:12px;border:3px solid var(--line);border-radius:12px;background:#fff;direction:ltr}
-#voiceNote{font-size:18px;margin:8px 0 0}
-.sizeRow{display:flex;gap:12px;align-items:center}
-#sizeVal{font-size:24px;min-width:4em;text-align:center;font-weight:700}
-
-#dict{
-  position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.35);
-  display:flex;align-items:center;justify-content:center;padding:16px;
-}
-#dictBox{
-  background:#fffdf6;border:3px solid var(--line);border-radius:16px;
-  width:min(640px,100%);max-height:92vh;overflow:auto;padding:22px;
-}
-#dictWord{font-size:44px;font-weight:700;margin:0 0 10px;text-align:left;word-break:break-word}
-#dictHe{font-size:36px;line-height:1.5;min-height:3em;margin:0 0 14px}
-#dictHe .alt{font-size:28px;line-height:1.45;margin-top:8px}
-#dictHe .dw{display:inline-block;border:2px solid #555;border-radius:10px;background:#fff;padding:0 .4em;margin:4px 0 4px .5em}
-/* שורת הכפתורים נשארת צמודה לתחתית החלון, כדי ש"סגירה" תמיד נראית גם כשיש הרבה משמעויות */
-#dictBox{padding-bottom:0!important}
-#dictBox .row{position:sticky;bottom:0;z-index:1;background:#fffdf6;margin-top:6px;padding:10px 0 14px}
-#dictSay{order:1}
-#dictClose{order:2}
-#dictGoogle{order:3}
-
-#toast{
-  position:fixed;left:50%;top:84px;transform:translateX(-50%);z-index:60;
-  background:#111;color:#fff;padding:14px 22px;border-radius:12px;font-size:21px;max-width:92vw;text-align:center;
-}
-
-#moreBtn{display:none}
-
-/* ---------- טלפון: חלון טקסט גדול, פקדים קטנים בתחתית ---------- */
-@media (max-width:640px), (max-height:520px) and (orientation:landscape){
-  .btn{min-width:50px;min-height:58px;font-size:15px;padding:4px 6px}
-  .btn.wide{padding:4px 14px}
-
-  #editView{padding:16px 14px 28px}
-  #editView h1{font-size:28px}
-  #editView p.sub{font-size:19px}
-  #src{font-size:22px;min-height:45vh}
-
-  /* שורה אחת למעלה: טקסט חדש, הגדרות, והקטנה והגדלה של הטקסט (כדי שלא צריך לצבוט את המסך) */
-  #topbar{padding:6px 8px;gap:6px;flex-wrap:nowrap}
-  #topbar .btn.small{min-height:48px;font-size:17px;padding:4px 8px;flex:1 1 auto;min-width:0}
-  #topbar .btn.sz{flex:0 0 auto;min-width:48px;font-size:20px;padding:4px 6px}
-  #topbar .spacer,#where{display:none}
-
-  /* שורת כפתורים אחת למטה, והשאר נפתח בלחיצה על "עוד" */
-  #controls{padding:8px 8px calc(8px + env(safe-area-inset-bottom));gap:6px}
-  #nav{flex-wrap:nowrap;gap:5px;width:100%}
-  #nav .btn{flex:1 1 0;min-width:0;min-height:58px;font-size:15px;padding:4px 2px}
-  #nav .btn.wide{flex:1.8 1 0;padding:4px 6px;gap:6px;font-size:17px}
-  #moreBtn{display:flex;flex-direction:row;gap:8px;width:100%;min-height:46px;font-size:17px}
-  /* המגירה נפתחת מעל הפקדים ולא דוחפת ולא מכווצת את חלון הטקסט */
-  #tools{display:none;position:absolute;left:0;right:0;bottom:100%;width:auto;max-height:55vh;overflow:auto;gap:8px 10px;
-    background:var(--bar);border-top:3px solid var(--line);padding:10px 8px;box-shadow:0 -6px 14px rgba(0,0,0,.18)}
-  #controls.open #tools{display:flex}
-  .speed{font-size:18px}
-
-  /* טקסט: שורות קרובות יותר כדי שיותר ממנו ייכנס במסך */
-  #page{padding:14px 14px 40vh}
-  #text{line-height:1.75;word-spacing:.06em;letter-spacing:0}
-  .para{margin:0 0 1.1em}
-
-  #settings,#dict{padding:10px}
-  #settingsBox,#dictBox{max-height:88vh;padding:16px}
-  #dictWord{font-size:36px}
-  #dictHe{font-size:30px}
-  #toast{top:72px}
-}
-/* טלפון על הצד: המסך נמוך מאוד, לכן הפס העליון נגלל יחד עם הטקסט והפקדים בשורה אחת */
-@media (max-height:520px) and (orientation:landscape){
-  #topbar{padding:4px 8px}
-  #topbar .btn.small{min-height:44px}
-  #controls{flex-direction:row;align-items:center;gap:8px;padding:6px 10px calc(6px + env(safe-area-inset-bottom))}
-  #nav{flex:1;width:auto}
-  #nav .btn{min-height:52px}
-  #moreBtn{width:auto;min-width:210px;min-height:52px;flex:0 0 auto}
-  #tools{max-height:62vh;justify-content:center}
-  #page{padding-bottom:30vh}
-}
-@supports (height:100dvh){
-  @media (max-width:640px){
-    #settingsBox,#dictBox{max-height:88dvh}
-  }
-}
-@media (prefers-reduced-motion:no-preference){
-  .s{transition:background .15s}
-}
-</style>
+<link rel="stylesheet" href="css/a11y-base.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/screens.css">
+<link rel="stylesheet" href="css/dialogs.css">
+<link rel="stylesheet" href="css/library.css">
+<link rel="stylesheet" href="css/pocket.css">
+<link rel="stylesheet" href="css/notes.css">
+<link rel="stylesheet" href="css/text-edit.css">
+<link rel="stylesheet" href="css/phone.css">
+<script src="js/shared/error-boundary.js"></script>
 </head>
 <body>
 
@@ -201,17 +23,28 @@ html.reading,html.reading body{height:100%;overflow:hidden;overscroll-behavior:n
 <main id="editView" hidden>
   <h1>הדביקי כאן טקסט באנגלית</h1>
   <p class="sub">אפשר להדביק מ-Word או מאתר. אין הגבלה על האורך.</p>
+  <div class="shelfRow">
+    <button class="btn wide" id="libBtn" type="button">הטקסטים השמורים שלי</button>
+    <button class="btn wide" type="button" data-open-pocket>המילון שלי</button>
+  </div>
   <textarea id="src" lang="en" dir="ltr" spellcheck="false" aria-label="תיבת טקסט באנגלית" placeholder="Paste your English text here…"></textarea>
+  <div class="saveRow">
+    <label class="saveLabel" for="saveName">שם לשמירה (לא חובה). אם כותבים שם, הטקסט נשמר ואפשר לחזור אליו בכל יום</label>
+    <input id="saveName" type="text" maxlength="60" autocomplete="off" placeholder="למשל: הארי פוטר, פרק 1">
+  </div>
   <div class="row">
     <button class="btn wide primary" id="startBtn" type="button">התחילי לקרוא</button>
     <button class="btn wide" id="clearBtn" type="button">ניקוי</button>
     <button class="btn wide" id="backBtn" type="button" hidden>חזרה לטקסט הקודם</button>
     <span id="count" aria-live="polite"></span>
   </div>
+  <nav class="site-legal" aria-label="מידע משפטי"><a href="legal/accessibility.html">הצהרת נגישות</a><a href="legal/privacy.html">פרטיות ועוגיות</a><a href="legal/terms.html">תנאי שימוש וזכויות יוצרים</a></nav>
 </main>
 
 <!-- ============ מסך הקריאה ============ -->
-<section id="readView" hidden>
+<main id="readView" hidden>
+  <a class="skip-link" href="#page">דילוג לטקסט</a>
+  <h1 class="sr-only">הטקסט לקריאה</h1>
   <div id="topbar">
     <button class="btn small wide" id="newBtn" type="button">טקסט חדש</button>
     <button class="btn small wide" id="setBtn" type="button">הגדרות</button>
@@ -222,31 +55,52 @@ html.reading,html.reading body{height:100%;overflow:hidden;overscroll-behavior:n
     <div id="prog"><div id="progFill"></div></div>
   </div>
 
-  <div id="page"><div id="text" lang="en"></div></div>
+  <div id="titleBar">
+    <label class="sr-only" for="textTitle">כותרת הטקסט</label>
+    <input id="textTitle" type="text" maxlength="60" autocomplete="off" placeholder="כותרת לטקסט (עברית או אנגלית)">
+    <div id="textTools">
+      <button class="btn small" id="editBtn" type="button" aria-label="עריכת הטקסט">עריכה</button>
+      <button class="btn small" id="noteBtn" type="button">הערה</button>
+    </div>
+  </div>
+
+  <section id="editPane" aria-label="עריכת הטקסט">
+    <p class="editHint">אפשר למחוק, להקליד, להוסיף מילים או הערות בסוגריים. השינוי נשמר רק אחרי לחיצה על "שמירה".</p>
+    <div class="editBtns">
+      <button class="btn small wide primary" id="editSaveStart" type="button">שמירה והקראה מההתחלה</button>
+      <button class="btn small wide" id="editSaveHere" type="button">שמירה והמשך מאותו מקום</button>
+      <button class="btn small wide" id="editClear" type="button">מחיקת כל הטקסט</button>
+      <button class="btn small wide" id="editCancel" type="button">ביטול</button>
+    </div>
+    <label class="sr-only" for="editText">עריכת הטקסט</label>
+    <textarea id="editText" lang="en" dir="ltr" spellcheck="false"></textarea>
+  </section>
+
+  <div id="page" tabindex="0" role="region" aria-label="הטקסט לקריאה"><div id="text" lang="en"></div></div>
 
   <div id="controls">
     <div id="nav">
       <button class="btn flip" id="sPrev" type="button" aria-label="משפט אחורה">
-        <svg viewBox="0 0 24 24"><path d="M3 5l9 7-9 7zM12 5l9 7-9 7z"/></svg>משפט</button>
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M3 5l9 7-9 7zM12 5l9 7-9 7z"/></svg>משפט</button>
       <button class="btn flip" id="wPrev" type="button" aria-label="מילה אחורה">
-        <svg viewBox="0 0 24 24"><path d="M7 4l12 8-12 8z"/></svg>מילה</button>
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M7 4l12 8-12 8z"/></svg>מילה</button>
 
       <button class="btn wide primary" id="playBtn" type="button" aria-label="הפעלה">
-        <svg id="icPlay" viewBox="0 0 24 24"><path d="M7 4l12 8-12 8z"/></svg>
-        <svg id="icPause" viewBox="0 0 24 24" hidden><rect x="6" y="4" width="4.5" height="16"/><rect x="13.5" y="4" width="4.5" height="16"/></svg>
+        <svg aria-hidden="true" focusable="false" id="icPlay" viewBox="0 0 24 24"><path d="M7 4l12 8-12 8z"/></svg>
+        <svg aria-hidden="true" focusable="false" id="icPause" viewBox="0 0 24 24" hidden><rect x="6" y="4" width="4.5" height="16"/><rect x="13.5" y="4" width="4.5" height="16"/></svg>
         <span id="playTxt">הפעלה</span></button>
 
       <button class="btn" id="wNext" type="button" aria-label="מילה קדימה">
-        <svg viewBox="0 0 24 24"><path d="M7 4l12 8-12 8z"/></svg>מילה</button>
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M7 4l12 8-12 8z"/></svg>מילה</button>
       <button class="btn" id="sNext" type="button" aria-label="משפט קדימה">
-        <svg viewBox="0 0 24 24"><path d="M3 5l9 7-9 7zM12 5l9 7-9 7z"/></svg>משפט</button>
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M3 5l9 7-9 7zM12 5l9 7-9 7z"/></svg>משפט</button>
     </div>
     <button class="btn small wide" id="moreBtn" type="button" aria-expanded="false" aria-controls="tools">מהירות, מילון ועוד ▲</button>
     <div id="tools">
       <button class="btn flip" id="pPrev" type="button" aria-label="פסקה אחורה">
-        <svg viewBox="0 0 24 24"><path d="M3 5l11 7-11 7z"/><rect x="17" y="5" width="3.5" height="14"/></svg>פסקה</button>
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M3 5l11 7-11 7z"/><rect x="17" y="5" width="3.5" height="14"/></svg>פסקה</button>
       <button class="btn" id="pNext" type="button" aria-label="פסקה קדימה">
-        <svg viewBox="0 0 24 24"><path d="M3 5l11 7-11 7z"/><rect x="17" y="5" width="3.5" height="14"/></svg>פסקה</button>
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M3 5l11 7-11 7z"/><rect x="17" y="5" width="3.5" height="14"/></svg>פסקה</button>
       <div class="speed">
         <span>מהירות</span>
         <button class="btn small" id="rateDown" type="button" aria-label="לאט יותר">−</button>
@@ -260,10 +114,13 @@ html.reading,html.reading body{height:100%;overflow:hidden;overscroll-behavior:n
         <button class="btn small" id="leadUp" type="button" aria-label="להקדים יותר את הסימון">+</button>
       </div>
       <button class="btn small wide" id="dictBtn" type="button">מילון</button>
+      <button class="btn small wide primary" id="newWordBtn" type="button">מילה חדשה</button>
+      <button class="btn small wide" type="button" data-open-pocket>המילון שלי</button>
+      <button class="btn small wide" id="saveBtn" type="button">שמירת הטקסט</button>
       <button class="btn small wide" id="restartBtn" type="button">מההתחלה</button>
     </div>
   </div>
-</section>
+</main>
 
 <!-- ============ הגדרות ============ -->
 <div id="settings" hidden role="dialog" aria-modal="true" aria-label="הגדרות">
@@ -282,6 +139,7 @@ html.reading,html.reading body{height:100%;overflow:hidden;overscroll-behavior:n
     </div>
 
     <div class="row"><button class="btn wide primary" id="closeSet" type="button">סגירה</button></div>
+    <nav class="site-legal" aria-label="מידע משפטי"><a href="legal/accessibility.html">הצהרת נגישות</a><a href="legal/privacy.html">פרטיות ועוגיות</a><a href="legal/terms.html">תנאי שימוש וזכויות יוצרים</a></nav>
   </div>
 </div>
 
@@ -290,744 +148,100 @@ html.reading,html.reading body{height:100%;overflow:hidden;overscroll-behavior:n
   <div id="dictBox">
     <div id="dictWord" lang="en" dir="ltr"></div>
     <div id="dictHe" lang="he" dir="rtl" aria-live="polite"></div>
+    <div class="pocketAct">
+      <button class="btn small wide" id="dictPocketBtn" type="button" hidden>מילה חדשה: להוסיף למילון שלי</button>
+      <p id="dictPocketNote" aria-live="polite"></p>
+    </div>
     <div class="row">
       <button class="btn small wide" id="dictSay" type="button">שמעי את המילה</button>
-      <a class="btn small wide" id="dictGoogle" href="#" target="_blank" rel="noopener" style="text-decoration:none">פתיחה ב-Google Translate</a>
+      <a class="btn small wide" id="dictGoogle" href="https://translate.google.com/" target="_blank" rel="noopener noreferrer">פתיחה ב-Google Translate</a>
       <button class="btn wide primary" id="dictClose" type="button">סגירה</button>
     </div>
   </div>
 </div>
 
+<!-- ============ הטקסטים השמורים ============ -->
+<div id="library" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="libraryTitle">
+  <div class="sheetBox">
+    <h2 id="libraryTitle">הטקסטים השמורים שלי</h2>
+    <p id="libraryEmpty" class="sheetNote">עוד אין טקסטים שמורים. כשכותבים שם בתיבת "שם לשמירה", או לוחצים על "שמירת הטקסט" בזמן קריאה, הטקסט מופיע כאן.</p>
+    <div id="libraryList"></div>
+    <div class="row sheetBtns"><button class="btn wide primary" id="libraryClose" type="button">סגירה</button></div>
+  </div>
+</div>
+
+<!-- ============ שמירת הטקסט בשם ============ -->
+<div id="saveText" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="saveTextTitle">
+  <div class="sheetBox">
+    <h2 id="saveTextTitle">שמירת הטקסט</h2>
+    <label class="saveLabel" for="saveTitle">שם לטקסט</label>
+    <input id="saveTitle" type="text" maxlength="60" autocomplete="off" placeholder="למשל: הארי פוטר, פרק 1">
+    <p class="sheetNote">אם כבר שמור טקסט באותו שם, הוא יוחלף.</p>
+    <div class="row sheetBtns">
+      <button class="btn wide primary" id="saveConfirm" type="button">שמירה</button>
+      <button class="btn wide" id="saveCancel" type="button">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ מילון הכיס ============ -->
+<div id="pocket" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="pocketTitle">
+  <div class="sheetBox">
+    <h2 id="pocketTitle">המילון שלי</h2>
+    <p id="pocketEmpty" class="sheetNote">עוד אין מילים. בזמן קריאה לוחצים על מילה, על "מילון", ואז על "הוסיפי למילון שלי". המילה תסומן בירוק בכל טקסט שבו היא מופיעה.</p>
+    <button class="btn small wide" id="pocketCopyAll" type="button" hidden>העתקת כל המילים לוורד</button>
+    <div id="pocketList"></div>
+    <div class="row sheetBtns"><button class="btn wide primary" id="pocketClose" type="button">סגירה</button></div>
+  </div>
+</div>
+
+<!-- ============ הערות על מילים ============ -->
+<div id="notes" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="notesTitle">
+  <div class="sheetBox">
+    <h2 id="notesTitle">הערות</h2>
+    <p class="sheetNote">הערה חדשה על: <strong id="notesTarget" lang="en" dir="ltr"></strong></p>
+    <label class="saveLabel" for="noteInput">ההערה (עברית או אנגלית)</label>
+    <textarea id="noteInput" class="noteField" dir="auto" maxlength="500"></textarea>
+    <div class="row"><button class="btn small wide primary" id="noteAdd" type="button">הוספת הערה</button></div>
+    <h3 class="notesHead">ההערות שכבר יש בטקסט הזה</h3>
+    <p id="notesEmpty" class="sheetNote">עוד אין הערות בטקסט הזה.</p>
+    <div id="notesList"></div>
+    <div class="row sheetBtns"><button class="btn wide primary" id="notesClose" type="button">סגירה</button></div>
+  </div>
+</div>
+
 <div id="toast" hidden role="status"></div>
 
-<script>
-(() => {
-'use strict';
-
-const $ = s => document.querySelector(s);
-const synth = window.speechSynthesis;
-
-const store = {
-  get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : v; } catch(e){ return d; } },
-  set(k, v){ try { localStorage.setItem(k, v); return true; } catch(e){ return false; } },
-  del(k){ try { localStorage.removeItem(k); } catch(e){} }
-};
-
-/* ---------------- מצב ---------------- */
-let words = [], sentences = [], paras = [];
-let cur = 0, curWordEl = null, curSentEl = null, curSent = -1;
-let playing = false, finished = false;
-let gen = 0;                       // מזהה דור: מתעלם מאירועים ישנים של הקראה שבוטלה
-let rate = clamp(parseFloat(store.get('tts.rate65', '0.65')) || 0.65, 0.3, 2);
-let lead = clamp(parseInt(store.get('tts.lead', '2'), 10), 0, 6);   // כמה מילים להקדים את הסימון, כי הקול "מאחר" לדווח איפה הוא
-if (isNaN(lead)) lead = 2;
-const dictCache = {};
-let fontSize = clamp(parseInt(store.get('tts.size', '32'), 10) || 32, 20, 72);
-let voices = [], voice = null;
-const voiceHasBoundary = {};
-let cpsMap = {};
-try { cpsMap = JSON.parse(store.get('tts.cps', '{}')) || {}; } catch(e){}
-let estTimer = null, fbTimer = null, watchT = null, queueT = null, saveT = null, toastT = null;
-let retries = 0;
-let utterRef = null;               // מחזיקים הפניה כדי ש-Chrome לא ימחק את ההקראה
-
-function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
-
-/* ---------------- פירוק הטקסט ---------------- */
-const TITLES = new Set(['mr','mrs','ms','dr','prof','sr','jr','st','vs','mt','fig','no','gen','gov','hon','rev','sen','rep','lt','col','sgt','capt','cf','inc','ltd','co','dept','approx']);
-const END_RE = /[.!?…]+["'”’)\]]*$/;
-
-function isSentenceEnd(tok, next){
-  if (!END_RE.test(tok)) return false;
-  const bare = tok.replace(/["'”’)\]]+$/, '');
-  const core = bare.replace(/^[("'“‘\[]+/, '');
-  if (/^[A-Za-z]\.$/.test(core)) return false;               // ראשי תיבות של שם: J.
-  if (/^([A-Za-z]\.){2,}$/.test(core)) return false;          // U.S.
-  if (TITLES.has(core.replace(/\.$/, '').toLowerCase()) && core.endsWith('.')) return false;
-  if (next && /^[("'“‘\[]*[a-z]/.test(next)) return false;    // המילה הבאה באות קטנה
-  return true;
-}
-
-function parse(text){
-  words = []; sentences = []; paras = [];
-  const clean = text.replace(/[​-‏‪-‮﻿­]/g, '').replace(/\r/g, '');
-  for (const line of clean.split(/\n+/)){
-    const toks = line.trim().split(/\s+/).filter(Boolean);
-    if (!toks.length) continue;
-    const pIdx = paras.length;
-    const para = { first: words.length, last: 0, el: null };
-    let sFirst = words.length, count = 0;
-    for (let k = 0; k < toks.length; k++){
-      const tok = toks[k];
-      words.push({ t: tok, s: sentences.length, p: pIdx, el: null });
-      count++;
-      let end = false;
-      if (k === toks.length - 1) end = true;
-      else if (isSentenceEnd(tok, toks[k+1])) end = true;
-      else if (count >= 60 || (count >= 35 && /[,;:]["'”’)\]]*$/.test(tok))) end = true;   // משפט ארוך מאוד נחתך בנקודה טבעית
-      if (end){
-        sentences.push({ first: sFirst, last: words.length - 1, p: pIdx, el: null });
-        sFirst = words.length; count = 0;
-      }
-    }
-    para.last = words.length - 1;
-    paras.push(para);
-  }
-}
-
-function render(){
-  const root = $('#text');
-  root.textContent = '';
-  const frag = document.createDocumentFragment();
-  for (const pa of paras){
-    const p = document.createElement('p');
-    p.className = 'para';
-    const sFrom = words[pa.first].s, sTo = words[pa.last].s;
-    for (let si = sFrom; si <= sTo; si++){
-      const s = sentences[si];
-      const sp = document.createElement('span');
-      sp.className = 's';
-      for (let i = s.first; i <= s.last; i++){
-        const w = document.createElement('span');
-        w.className = 'w';
-        w.dataset.i = i;
-        w.textContent = words[i].t;
-        words[i].el = w;
-        sp.appendChild(w);
-        if (i < s.last) sp.appendChild(document.createTextNode(' '));
-      }
-      s.el = sp;
-      p.appendChild(sp);
-      p.appendChild(document.createTextNode(' '));
-    }
-    pa.el = p;
-    frag.appendChild(p);
-  }
-  root.appendChild(frag);
-  curWordEl = null; curSentEl = null; curSent = -1;
-}
-
-/* ---------------- הדגשה ומיקום ---------------- */
-function setCur(i, opts){
-  if (!words.length) return;
-  i = clamp(i, 0, words.length - 1);
-  const w = words[i];
-  if (i !== cur || !curWordEl){
-    if (curWordEl) curWordEl.classList.remove('cur');
-    w.el.classList.add('cur');
-    curWordEl = w.el;
-    cur = i;
-  }
-  if (w.s !== curSent || !curSentEl){
-    if (curSentEl) curSentEl.classList.remove('cur');
-    sentences[w.s].el.classList.add('cur');
-    curSentEl = sentences[w.s].el;
-    curSent = w.s;
-  }
-  updateProgress();
-  if (!(opts && opts.noScroll)) follow(w.el);
-  savePosSoon();
-}
-
-function setReading(on){ document.documentElement.classList.toggle('reading', !!on); }
-
-let lastFollow = 0, followT = null;
-function follow(el, instant){
-  // לא מתחילים גלילה חדשה בזמן שגלילה רכה עדיין רצה: זה מה שגרם לטקסט "לקפוץ"
-  const now = performance.now();
-  if (!instant && now - lastFollow < 550){
-    clearTimeout(followT);
-    followT = setTimeout(() => { if (curWordEl) follow(curWordEl); }, 570);   // בודקים שוב אחרי שהגלילה נגמרה
-    return;
-  }
-  // הטקסט גולל בתוך החלון שלו (#page), לא בתוך העמוד. החלון הוא בדיוק מה שנשאר בין הפס העליון לפקדים.
-  const pg = $('#page');
-  const pr = pg.getBoundingClientRect();
-  const area = pr.height;
-  if (area < 60) return;
-  const r = el.getBoundingClientRect();
-  const topLimit = pr.top + area * 0.06;
-  const bottomLimit = pr.top + area * 0.80;
-  if (instant || r.top < topLimit || r.bottom > bottomLimit){
-    lastFollow = now;
-    const target = pr.top + area * 0.28;
-    const delta = r.top - target;
-    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    pg.scrollBy({ top: delta, behavior: (instant || calm) ? 'auto' : 'smooth' });
-  }
-}
-
-function updateProgress(){
-  const n = words.length;
-  const phone = window.matchMedia('(max-width:640px), (max-height:520px) and (orientation:landscape)').matches;
-  $('#where').textContent = phone ? (cur + 1) + ' / ' + n : 'מילה ' + (cur + 1) + ' מתוך ' + n;
-  $('#progFill').style.width = (n > 1 ? (cur / (n - 1)) * 100 : 100) + '%';
-}
-
-function savePosSoon(){
-  clearTimeout(saveT);
-  saveT = setTimeout(() => store.set('tts.pos', String(cur)), 400);
-}
-
-/* ---------------- קולות ---------------- */
-function voiceScore(v){
-  const n = v.name, lang = (v.lang || '').replace('_', '-');
-  let s = 30;
-  if (/natural|neural/i.test(n)) s = 100;
-  else if (/online/i.test(n)) s = 90;
-  else if (/google uk english female/i.test(n)) s = 72;
-  else if (/google us english/i.test(n)) s = 70;
-  else if (/google uk english male/i.test(n)) s = 66;
-  else if (/google/i.test(n)) s = 60;
-  else if (/premium|enhanced/i.test(n)) s = 75;
-  else if (/samantha|daniel|karen|moira|serena|ava|allison|tessa|alex|kate|oliver/i.test(n)) s = 55;
-  else if (/zira|hazel/i.test(n)) s = 45;
-  else if (/david|mark|susan|george|james|richard/i.test(n)) s = 40;
-  else if (/espeak/i.test(n)) s = 10;
-  if (/^en-(US|GB)$/i.test(lang)) s += 3;
-  return s;
-}
-
-function loadVoices(){
-  if (!synth) return;
-  const all = synth.getVoices().filter(v => /^en/i.test((v.lang || '').replace('_', '-')));
-  if (!all.length) return;
-  all.sort((a, b) => voiceScore(b) - voiceScore(a));
-  voices = all;
-  const sel = $('#voiceSel');
-  sel.textContent = '';
-  voices.forEach((v, i) => {
-    const o = document.createElement('option');
-    o.value = v.name;
-    o.textContent = v.name + (i === 0 ? '   ← מומלץ' : '');
-    sel.appendChild(o);
-  });
-  const saved = store.get('tts.voice', '');
-  const keep = voice && voices.find(v => v.name === voice.name);
-  voice = keep || voices.find(v => v.name === saved) || voices[0];
-  sel.value = voice.name;
-  updateVoiceNote();
-}
-
-function updateVoiceNote(){
-  if (!voice){ $('#voiceNote').textContent = ''; return; }
-  const k = voiceHasBoundary[voice.name];
-  let t;
-  if (k === true) t = 'בקול הזה ההדגשה של המילה מדויקת.';
-  else if (k === false) t = 'בקול הזה ההדגשה של המילה מוערכת לפי קצב הדיבור, ויישור הקו מתחדש בכל משפט.';
-  else t = 'הדגשת המילה תתכוונן אוטומטית לפי הקול.';
-  $('#voiceNote').textContent = t;
-}
-
-/* ---------------- הקראה ---------------- */
-function halt(){
-  gen++;
-  clearInterval(estTimer); estTimer = null;
-  clearTimeout(fbTimer); clearTimeout(watchT);
-  try { synth.cancel(); } catch(e){}
-}
-
-function getCps(){ return cpsMap[voice ? voice.name : ''] || 14.5; }
-
-function speakFrom(idx){
-  halt();
-  clearTimeout(queueT);
-  if (idx >= words.length){ finish(); return; }
-  setCur(idx);
-  const my = gen;
-  const s = sentences[words[idx].s];
-
-  // בונים את הטקסט להקראה, ושומרים איפה מתחילה כל מילה
-  let text = '';
-  const offs = [];
-  for (let i = idx; i <= s.last; i++){
-    if (i > idx) text += ' ';
-    offs.push(text.length);
-    const t = words[i].t;
-    text += /[A-Za-z0-9À-ɏ]/.test(t) ? t : ',';
-  }
-
-  try { if (synth.paused) synth.resume(); } catch(e){}
-  const u = new SpeechSynthesisUtterance(text);
-  utterRef = u;
-  if (voice){ u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
-  u.rate = rate; u.pitch = 1; u.volume = 1;
-
-  let started = false, gotBoundary = false, tStart = 0;
-
-  function idxFromChar(c){
-    let lo = 0, hi = offs.length - 1;
-    while (lo < hi){
-      const mid = (lo + hi + 1) >> 1;
-      if (offs[mid] <= c) lo = mid; else hi = mid - 1;
-    }
-    return lo;
-  }
-
-  function startEstimate(){
-    if (my !== gen || gotBoundary) return;
-    if (voice) { voiceHasBoundary[voice.name] = false; updateVoiceNote(); }
-    clearInterval(estTimer);
-    const n = offs.length;
-    const cum = [];
-    let total = 0;
-    for (let k = 0; k < n; k++){
-      const t = words[idx + k].t;
-      cum.push(total);
-      total += t.length + 1.2 + (/[,;:]["'”’)\]]*$/.test(t) ? 3 : 0) + (END_RE.test(t) ? 4 : 0);
-    }
-    const dur = (text.length / (getCps() * rate)) * 1000;
-    let k = 0;
-    estTimer = setInterval(() => {
-      if (my !== gen){ clearInterval(estTimer); return; }
-      const el = performance.now() - tStart;
-      const pos = (el / dur) * total;
-      while (k < n - 1 && cum[k + 1] <= pos) k++;
-      const t = clamp(idx + k + lead, idx, s.last);
-      if (t !== cur) setCur(t);
-    }, 40);
-  }
-
-  u.onstart = () => {
-    if (my !== gen) return;
-    started = true; retries = 0;
-    clearTimeout(watchT);
-    tStart = performance.now();
-    if (voice && voiceHasBoundary[voice.name] === false) startEstimate();
-    else if (voice && voiceHasBoundary[voice.name] === undefined && !voice.localService) startEstimate();
-    else fbTimer = setTimeout(startEstimate, 700);
-  };
-
-  u.onboundary = e => {
-    if (my !== gen) return;
-    if (e.name && e.name !== 'word') return;
-    if (!gotBoundary){
-      gotBoundary = true;
-      clearInterval(estTimer); estTimer = null; clearTimeout(fbTimer);
-      if (voice){ voiceHasBoundary[voice.name] = true; updateVoiceNote(); }
-    }
-    const k = idxFromChar(e.charIndex || 0);
-    const t = clamp(idx + k + lead, idx, s.last);
-    if (t !== cur) setCur(t);
-  };
-
-  u.onend = () => {
-    if (my !== gen) return;
-    // לומדים כמה מהר הקול באמת מדבר, כדי שההערכה תהיה מדויקת יותר
-    if (!gotBoundary && started && text.length > 40 && voice){
-      const secs = (performance.now() - tStart) / 1000;
-      if (secs > 0.5){
-        const measured = text.length / secs / rate;
-        if (measured > 5 && measured < 40){
-          const old = cpsMap[voice.name];
-          cpsMap[voice.name] = old ? old * 0.7 + measured * 0.3 : measured;
-          store.set('tts.cps', JSON.stringify(cpsMap));
-        }
-      }
-    }
-    if (!playing) return;
-    speakFrom(s.last + 1);
-  };
-
-  u.onerror = e => {
-    if (my !== gen) return;
-    if (e.error === 'interrupted' || e.error === 'canceled') return;
-    const local = voices.find(v => v.localService);
-    if (voice && !voice.localService && local){
-      voice = local;
-      $('#voiceSel').value = voice.name;
-      store.set('tts.voice', voice.name);
-      updateVoiceNote();
-      toast('הקול הקודם לא הגיב, עברתי לקול אחר שנמצא במחשב.');
-      speakFrom(idx);
-      return;
-    }
-    pause();
-    toast('ההקראה נעצרה. אפשר לנסות קול אחר בהגדרות.');
-  };
-
-  // אם ההקראה לא התחילה תוך כמה שניות, מנסים שוב
-  watchT = setTimeout(() => {
-    if (my !== gen || started) return;
-    if (retries < 2){ retries++; speakFrom(idx); }
-    else { pause(); toast('הקול לא מתחיל. אפשר לנסות קול אחר בהגדרות.'); }
-  }, 5000);
-
-  synth.speak(u);
-}
-
-function finish(){
-  playing = false; finished = true;
-  halt();
-  updatePlayBtn();
-  toast('סיימנו את הטקסט.');
-}
-
-function play(){
-  if (!words.length) return;
-  if (!synth){ toast('הדפדפן הזה לא תומך בהקראה. כדאי לפתוח ב-Chrome.'); return; }
-  if (finished){ finished = false; setCur(0); }
-  playing = true; retries = 0;
-  updatePlayBtn();
-  speakFrom(cur);
-}
-
-function pause(){
-  playing = false;
-  clearTimeout(queueT);
-  halt();
-  updatePlayBtn();
-  store.set('tts.pos', String(cur));
-}
-
-function toggle(){ playing ? pause() : play(); }
-
-function updatePlayBtn(){
-  $('#icPlay').toggleAttribute('hidden', playing);
-  $('#icPause').toggleAttribute('hidden', !playing);
-  $('#playTxt').textContent = playing ? 'עצירה' : 'הפעלה';
-  $('#playBtn').setAttribute('aria-label', playing ? 'עצירה' : 'הפעלה');
-}
-
-/* ---------------- ניווט ---------------- */
-function go(i){
-  if (!words.length) return;
-  i = clamp(i, 0, words.length - 1);
-  finished = false;
-  if (playing){
-    halt();
-    setCur(i);
-    clearTimeout(queueT);
-    queueT = setTimeout(() => { if (playing) speakFrom(cur); }, 220);
-  } else {
-    setCur(i);
-  }
-}
-
-const wordNext = () => go(cur + 1);
-const wordPrev = () => go(cur - 1);
-function sentNext(){
-  const s = sentences[words[cur].s];
-  go(s.last + 1 >= words.length ? cur : s.last + 1);
-}
-function sentPrev(){
-  const si = words[cur].s, s = sentences[si];
-  if (cur > s.first + 1 || si === 0) go(s.first);
-  else go(sentences[si - 1].first);
-}
-function paraNext(){
-  const p = paras[words[cur].p];
-  go(p.last + 1 >= words.length ? cur : p.last + 1);
-}
-function paraPrev(){
-  const pi = words[cur].p, p = paras[pi];
-  if (cur > p.first + 1 || pi === 0) go(p.first);
-  else go(paras[pi - 1].first);
-}
-
-function setRate(r){
-  rate = Math.round(clamp(r, 0.3, 2) * 100) / 100;
-  $('#rateVal').textContent = rate.toFixed(2);
-  store.set('tts.rate65', String(rate));
-  if (playing){
-    halt();
-    clearTimeout(queueT);
-    queueT = setTimeout(() => { if (playing) speakFrom(cur); }, 250);
-  }
-}
-
-function setLead(n){
-  lead = clamp(n, 0, 6);
-  $('#leadVal').textContent = String(lead);
-  store.set('tts.lead', String(lead));
-}
-
-/* ---------------- מילון ---------------- */
-function cleanWord(t){
-  return t.replace(/^[^A-Za-z0-9À-ɏ]+/, '').replace(/[^A-Za-z0-9À-ɏ]+$/, '')
-          .replace(/[’]s$/i, '').replace(/'s$/i, '');
-}
-
-/* המילון: Google Translate, תרגום ראשי + משמעויות לפי סוג מילה (עם ניקוד, כמו שהוא נותן, כי בלי ניקוד נוצרות מילים בכתיב שגוי).
-   המקור הקודם (MyMemory, מאגר שכל אחד מוסיף לו) נתן "לא מושלם" למילה perfectly, ולכן הוסר גם כגיבוי:
-   תרגום הפוך גרוע מלא להציג תרגום. אם Google לא עונה, מוצגת הודעה עם כפתור לפתיחה ב-Google Translate. */
-const NIQQUD_RE = /[\u0591-\u05C7]/g;
-const isHe = s => /[\u0590-\u05FF]/.test(s || '');
-const heClean = s => (s || '').replace(/\s+/g, ' ').trim();
-const heKey = s => s.replace(NIQQUD_RE, '');
-const POS_HE = { noun: 'שם עצם', verb: 'פועל', adjective: 'תואר', adverb: 'תואר הפועל', conjunction: 'מילת חיבור',
-  preposition: 'מילת יחס', pronoun: 'כינוי', interjection: 'מילת קריאה', article: 'סוג מילה', abbreviation: 'ראשי תיבות' };
-
-async function fetchJson(url, ms){
-  const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), ms);
-  try {
-    const r = await fetch(url, { signal: ctl.signal });
-    if (!r.ok) throw new Error('http ' + r.status);
-    return await r.json();
-  } finally { clearTimeout(timer); }
-}
-
-async function lookup(word){
-  const key = word.toLowerCase();
-  if (dictCache[key]) return dictCache[key];
-  const j = await fetchJson('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=iw&dt=t&dt=bd&q=' + encodeURIComponent(key), 9000);
-  const main = heClean(Array.isArray(j[0]) ? j[0].map(p => (p && p[0]) || '').join('') : '');
-  if (!isHe(main)) throw new Error('empty');
-  const seen = new Set([heKey(main)]);
-  const groups = [];
-  for (const pos of (Array.isArray(j[1]) ? j[1] : [])){
-    if (groups.length >= 3) break;
-    const entries = Array.isArray(pos[2]) ? pos[2].map(x => x && x[0]) : (pos[1] || []);
-    const words = [];
-    for (const e of entries){
-      const t = heClean(e);
-      if (!isHe(t) || seen.has(heKey(t))) continue;
-      seen.add(heKey(t));
-      words.push(t);
-      if (words.length >= (groups.length ? 2 : 3)) break;
-    }
-    if (words.length) groups.push({ label: POS_HE[pos[0]] || (isHe(pos[0]) ? pos[0] : 'עוד'), words });
-  }
-  dictCache[key] = { main, groups };
-  return dictCache[key];
-}
-
-let dictWordNow = '';
-async function openDict(){
-  if (!words.length) return;
-  if (playing) pause();
-  const w = cleanWord(words[cur].t);
-  if (!w){ toast('במילה הזאת אין מה לתרגם. אפשר לבחור מילה אחרת.'); return; }
-  dictWordNow = w;
-  $('#dictWord').textContent = w;
-  $('#dictHe').textContent = 'מחפש תרגום…';
-  $('#dictGoogle').href = 'https://translate.google.com/?sl=en&tl=iw&op=translate&text=' + encodeURIComponent(w);
-  $('#dict').hidden = false;
-  $('#dictClose').focus();
-  try {
-    const res = await lookup(w);
-    if (dictWordNow !== w) return;
-    const he = $('#dictHe');
-    he.textContent = '';
-    const main = document.createElement('div');
-    main.textContent = res.main;
-    he.appendChild(main);
-    res.groups.forEach(g => {
-      const d = document.createElement('div');
-      d.className = 'alt';
-      if (g.label){
-        const b = document.createElement('b');
-        b.textContent = g.label + ': ';
-        d.appendChild(b);
-      }
-      g.words.forEach(t => { const sp = document.createElement('span'); sp.className = 'dw'; sp.textContent = t; d.appendChild(sp); });
-      he.appendChild(d);
-    });
-  } catch(e){
-    if (dictWordNow !== w) return;
-    $('#dictHe').textContent = 'לא הצלחתי למצוא תרגום עכשיו. אפשר ללחוץ על הכפתור "פתיחה ב-Google Translate", או לנסות שוב בעוד רגע.';
-  }
-}
-
-function sayWord(){
-  if (!synth || !dictWordNow) return;
-  try { synth.cancel(); } catch(e){}
-  const u = new SpeechSynthesisUtterance(dictWordNow);
-  utterRef = u;
-  if (voice){ u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
-  u.rate = Math.min(rate, 0.8);
-  synth.speak(u);
-}
-
-function setFont(px){
-  fontSize = clamp(px, 20, 72);
-  document.documentElement.style.setProperty('--fs', fontSize + 'px');
-  $('#sizeVal').textContent = fontSize + ' px';
-  store.set('tts.size', String(fontSize));
-  if (curWordEl) setTimeout(() => follow(curWordEl, true), 30);
-}
-
-/* ---------------- מסכים ---------------- */
-function showEdit(){
-  pause();
-  $('#readView').hidden = true;
-  setReading(false);
-  $('#editView').hidden = false;
-  $('#src').value = '';
-  $('#backBtn').hidden = !words.length;
-  updateCount();
-  $('#src').focus();
-  window.scrollTo(0, 0);
-}
-
-function openRead(text, pos, instant){
-  parse(text);
-  if (!words.length){ toast('לא נמצא טקסט. אפשר להדביק שוב.'); return false; }
-  render();
-  $('#editView').hidden = true;
-  $('#readView').hidden = false;
-  setReading(true);
-  playing = false; finished = false;
-  updatePlayBtn();
-  cur = 0;
-  setCur(clamp(pos || 0, 0, words.length - 1), { noScroll: true });
-  window.scrollTo(0, 0);
-  $('#page').scrollTop = 0;
-  requestAnimationFrame(() => { if (pos) follow(curWordEl, true); });
-  return true;
-}
-
-function updateCount(){
-  const t = $('#src').value.trim();
-  $('#count').textContent = t ? (t.split(/\s+/).length.toLocaleString('he-IL') + ' מילים') : '';
-}
-
-let countT = null;
-function toast(msg){
-  const el = $('#toast');
-  el.textContent = msg;
-  el.hidden = false;
-  clearTimeout(toastT);
-  toastT = setTimeout(() => { el.hidden = true; }, 4500);
-}
-
-/* ---------------- חיבור אירועים ---------------- */
-$('#src').addEventListener('input', () => { clearTimeout(countT); countT = setTimeout(updateCount, 250); });
-
-$('#startBtn').addEventListener('click', () => {
-  const t = $('#src').value;
-  if (!t.trim()){ toast('כדאי להדביק קודם טקסט.'); $('#src').focus(); return; }
-  if (openRead(t, 0)){
-    if (!store.set('tts.text', t)){
-      store.del('tts.text');
-      toast('הטקסט ארוך מדי לשמירה לפעם הבאה, אבל הוא עובד כרגיל עכשיו.');
-    }
-    store.set('tts.pos', '0');
-  }
-});
-$('#clearBtn').addEventListener('click', () => { $('#src').value = ''; updateCount(); $('#src').focus(); });
-$('#backBtn').addEventListener('click', () => {
-  $('#editView').hidden = true;
-  $('#readView').hidden = false;
-  setReading(true);
-  if (curWordEl) follow(curWordEl, true);
-});
-$('#newBtn').addEventListener('click', showEdit);
-
-$('#playBtn').addEventListener('click', toggle);
-$('#wNext').addEventListener('click', wordNext);
-$('#wPrev').addEventListener('click', wordPrev);
-$('#sNext').addEventListener('click', sentNext);
-$('#sPrev').addEventListener('click', sentPrev);
-$('#pNext').addEventListener('click', paraNext);
-$('#pPrev').addEventListener('click', paraPrev);
-$('#rateDown').addEventListener('click', () => setRate(rate - 0.05));
-$('#rateUp').addEventListener('click', () => setRate(rate + 0.05));
-$('#restartBtn').addEventListener('click', () => go(0));
-$('#leadDown').addEventListener('click', () => setLead(lead - 1));
-$('#leadUp').addEventListener('click', () => setLead(lead + 1));
-$('#moreBtn').addEventListener('click', () => {
-  const c = $('#controls');
-  const open = c.classList.toggle('open');
-  $('#moreBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
-  $('#moreBtn').textContent = open ? 'סגירה ▼' : 'מהירות, מילון ועוד ▲';
-  if (curWordEl) setTimeout(() => follow(curWordEl, true), 30);
-});
-$('#dictBtn').addEventListener('click', openDict);
-$('#dictClose').addEventListener('click', () => { $('#dict').hidden = true; });
-$('#dictSay').addEventListener('click', sayWord);
-$('#dict').addEventListener('click', e => { if (e.target.id === 'dict') $('#dict').hidden = true; });
-
-// לחיצה על מילה מעבירה אליה את המיקום
-$('#text').addEventListener('click', e => {
-  const w = e.target.closest('.w');
-  if (!w) return;
-  if (String(window.getSelection()).length) return;
-  go(parseInt(w.dataset.i, 10));
-});
-
-// הגדרות
-$('#setBtn').addEventListener('click', () => { $('#settings').hidden = false; $('#closeSet').focus(); });
-$('#closeSet').addEventListener('click', () => { $('#settings').hidden = true; });
-$('#settings').addEventListener('click', e => { if (e.target.id === 'settings') $('#settings').hidden = true; });
-$('#voiceSel').addEventListener('change', e => {
-  voice = voices.find(v => v.name === e.target.value) || voice;
-  store.set('tts.voice', voice.name);
-  updateVoiceNote();
-  if (playing){ halt(); speakFrom(cur); }
-});
-$('#sizeDown').addEventListener('click', () => setFont(fontSize - 2));
-$('#sizeUp').addEventListener('click', () => setFont(fontSize + 2));
-$('#fontDown').addEventListener('click', () => setFont(fontSize - 4));
-$('#fontUp').addEventListener('click', () => setFont(fontSize + 4));
-$('#testBtn').addEventListener('click', () => {
-  if (!synth) return;
-  if (playing) pause();
-  halt();
-  const u = new SpeechSynthesisUtterance('Hello. This is how I sound at this speed.');
-  utterRef = u;
-  if (voice){ u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
-  u.rate = rate;
-  synth.speak(u);
-});
-
-// מקלדת
-document.addEventListener('keydown', e => {
-  if ($('#readView').hidden) {
-    if ($('#editView').hidden === false && e.ctrlKey && e.key === 'Enter') $('#startBtn').click();
-    return;
-  }
-  if (!$('#settings').hidden){ if (e.key === 'Escape') $('#settings').hidden = true; return; }
-  if (!$('#dict').hidden){ if (e.key === 'Escape') $('#dict').hidden = true; return; }
-  const tag = (e.target.tagName || '').toLowerCase();
-  if (tag === 'textarea' || tag === 'input' || tag === 'select') return;
-  if (e.altKey || e.ctrlKey || e.metaKey) return;
-  switch (e.key){
-    case ' ': if (tag === 'button') return; e.preventDefault(); toggle(); break;
-    case 'ArrowRight': e.preventDefault(); wordNext(); break;
-    case 'ArrowLeft':  e.preventDefault(); wordPrev(); break;
-    case 'ArrowDown':  e.preventDefault(); sentNext(); break;
-    case 'ArrowUp':    e.preventDefault(); sentPrev(); break;
-    case 'PageDown':   e.preventDefault(); paraNext(); break;
-    case 'PageUp':     e.preventDefault(); paraPrev(); break;
-  }
-});
-
-window.addEventListener('beforeunload', () => {
-  store.set('tts.pos', String(cur));
-  try { synth.cancel(); } catch(e){}
-});
-
-/* ---------------- התחלה ---------------- */
-$('#rateVal').textContent = rate.toFixed(2);
-$('#leadVal').textContent = String(lead);
-setFont(fontSize);
-
-if (!synth){
-  toast('הדפדפן הזה לא תומך בהקראה. כדאי לפתוח את הקובץ ב-Chrome.');
-} else {
-  loadVoices();
-  synth.onvoiceschanged = loadVoices;
-  setTimeout(loadVoices, 600);
-  setTimeout(loadVoices, 1800);
-}
-
-const savedText = store.get('tts.text', '');
-if (savedText.trim()) {
-  if (!openRead(savedText, parseInt(store.get('tts.pos', '0'), 10) || 0)) showEdit();
-} else {
-  $('#editView').hidden = false;
-  $('#src').focus();
-}
-
-// לבדיקות
-window.__tts = {
-  get words(){ return words; }, get sentences(){ return sentences; }, get paras(){ return paras; },
-  get cur(){ return cur; }, get playing(){ return playing; }, get rate(){ return rate; },
-  parse, openRead
-};
-})();
-</script>
+<script src="js/shared/safe-storage.js"></script>
+<script src="js/shared/dom-build.js"></script>
+<script src="js/shared/a11y-helpers.js"></script>
+<script src="js/shared/consent-gate.js"></script>
+<script src="js/state.js"></script>
+<script src="js/text-parse.js"></script>
+<script src="js/highlight.js"></script>
+<script src="js/voices.js"></script>
+<script src="js/speech.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/dictionary.js"></script>
+<script src="js/pocket/pocket-store.js"></script>
+<script src="js/pocket/pocket-markers.js"></script>
+<script src="js/pocket/pocket-copy.js"></script>
+<script src="js/pocket/pocket-add.js"></script>
+<script src="js/pocket/pocket-ui.js"></script>
+<script src="js/library/library-store.js"></script>
+<script src="js/library/library-ui.js"></script>
+<script src="js/library/library-rename.js"></script>
+<script src="js/edit/word-diff.js"></script>
+<script src="js/notes/notes-store.js"></script>
+<script src="js/notes/notes-marks.js"></script>
+<script src="js/notes/notes-ui.js"></script>
+<script src="js/edit/text-edit.js"></script>
+<script src="js/screens.js"></script>
+<script src="js/events.js"></script>
+<script src="js/library/library-events.js"></script>
+<script src="js/pocket/pocket-events.js"></script>
+<script src="js/notes/notes-events.js"></script>
+<script src="js/edit/text-edit-events.js"></script>
+<script src="js/boot.js"></script>
 </body>
 </html>

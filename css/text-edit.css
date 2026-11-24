@@ -1,0 +1,23 @@
+/* text-edit.css: שורת הכפתורים "עריכת הטקסט" ו"הערה", ומסך עריכת הטקסט בזמן קריאה */
+#titleBar{display:flex;gap:8px;align-items:center;flex-wrap:nowrap}
+#titleBar #textTitle{width:auto;flex:1 1 60px;min-width:0}
+#textTools{display:flex;gap:8px;flex:0 0 auto}
+/* בטלפון: שורה נמוכה יותר, כדי שחלון הקריאה יישאר גדול */
+@media (max-width:640px){
+  #titleBar{padding:3px 8px;gap:6px}
+  #titleBar #textTitle{min-height:44px;padding:2px 8px;font-size:17px}
+  #textTools{gap:6px}
+  #textTools .btn{min-height:44px;padding:2px 8px;font-size:17px}
+}
+
+/* בזמן עריכה: מסתירים את הטקסט ואת פקדי ההקראה, ומציגים את מסך העריכה */
+#editPane{display:none;flex:1 1 auto;min-height:0;flex-direction:column;gap:10px;padding:10px 14px 14px}
+#readView.editing #editPane{display:flex}
+#readView.editing #page,#readView.editing #controls,#readView.editing #textTools{display:none!important}
+.editHint{margin:0;font-size:19px}
+.editBtns{display:flex;gap:10px;flex-wrap:wrap}
+#editText{
+  flex:1 1 auto;min-height:40vh;width:100%;padding:16px;
+  font-size:var(--fs);line-height:1.7;direction:ltr;text-align:left;
+  background:#fff;border:3px solid var(--line);border-radius:14px;resize:none;
+}

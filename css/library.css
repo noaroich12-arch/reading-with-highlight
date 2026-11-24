@@ -1,0 +1,27 @@
+/* library.css: חלונות הספרייה ומילון הכיס (מבנה משותף), שמירה בשם, ושורת הכפתורים במסך ההדבקה */
+.shelfRow{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 18px}
+.saveRow{margin:0 0 6px}
+.saveLabel{display:block;font-weight:700;font-size:21px;margin:14px 0 6px}
+#saveName,#saveTitle{width:100%;font-size:22px;padding:12px;border:3px solid var(--line);border-radius:12px;background:#fff}
+
+/* כותרת הטקסט בראש מסך הקריאה */
+#titleBar{flex:0 0 auto;padding:6px 14px;background:var(--bar);border-bottom:3px solid var(--line)}
+#textTitle{width:100%;font-size:19px;padding:6px 10px;min-height:44px;border:3px solid var(--line);border-radius:12px;background:#fff}
+
+.sheet{
+  position:fixed;inset:0;z-index:52;background:rgba(0,0,0,.35);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+}
+.sheetBox{
+  background:#fffdf6;border:3px solid var(--line);border-radius:16px;
+  width:min(720px,100%);max-height:92vh;overflow:auto;padding:22px 22px 0;
+}
+.sheetBox h2{margin:0 0 10px;font-size:28px}
+.sheetNote{font-size:19px;margin:0 0 14px}
+/* שורת הכפתורים נשארת צמודה לתחתית החלון, כדי ש"סגירה" תמיד נראית */
+.sheetBtns{position:sticky;bottom:0;z-index:1;background:#fffdf6;margin-top:6px;padding:10px 0 14px}
+
+.libItem,.pocketItem{border:3px solid var(--line);border-radius:14px;background:#fff;padding:14px;margin:0 0 12px}
+.libTitle{font-size:26px;font-weight:700;word-break:break-word}
+.libMeta{font-size:19px;margin:4px 0 10px}
+.libBtns{display:flex;gap:10px;flex-wrap:wrap}

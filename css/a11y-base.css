@@ -1,0 +1,63 @@
+/* a11y-base.css: סגנון נגישות בסיסי. מתווסף לעיצוב של האתר ולא מחליף אותו.
+   מכיל: קישור דילוג, סימון פוקוס, טקסט לקורא מסך בלבד, תנועה מופחתת, יעדי מגע, וחלון הסכמה. */
+
+/* דילוג לתוכן: מופיע רק כשמגיעים אליו במקלדת */
+.skip-link {
+  position: absolute; inset-inline-start: 8px; top: -80px; z-index: 100000;
+  background: #1f1a14; color: #ffffff; padding: 12px 18px; border-radius: 10px;
+  font: 700 1.2rem Arial, Helvetica, sans-serif; text-decoration: none;
+}
+.skip-link:focus { top: 8px; }
+
+/* סימון פוקוס: טבעת כהולה עם הילה לבנה, גלויה על רקע בהיר וכהה */
+:where(a, button, input, select, textarea, summary, [tabindex], [role="button"]):focus-visible {
+  outline: 3px solid #0b4a8f; outline-offset: 2px; box-shadow: 0 0 0 6px #ffffff;
+}
+
+/* טקסט שמיועד רק לקורא מסך */
+.sr-only {
+  position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* מי שביקש פחות תנועה במערכת ההפעלה: מבטלים אנימציות ומעברים.
+   באתר שהתנועה בו היא חלק מהמשחק (בלונים, נחשים) מוסיפים class="keep-motion" ל-<html>,
+   ובקובץ CSS משלו מבטלים רק אנימציות קישוט (קונפטי, פעימות) ושומרים על אלה שהמשחק תלוי בהן. */
+@media (prefers-reduced-motion: reduce) {
+  html:not(.keep-motion) *, html:not(.keep-motion) *::before, html:not(.keep-motion) *::after {
+    animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important; scroll-behavior: auto !important;
+  }
+}
+
+/* מסך מגע: יעד לחיצה של 44 פיקסלים לפחות */
+@media (pointer: coarse) {
+  :where(button, [role="button"], select, summary) { min-height: 44px; }
+}
+
+/* הודעת שגיאה כללית (error-boundary.js) */
+.site-guard {
+  position: fixed; inset-inline: 12px; bottom: 12px; z-index: 100001;
+  background: #fff3cd; color: #3d2c00; border: 3px solid #b45309; border-radius: 14px;
+  padding: 14px 16px; font: 1.1rem/1.5 Arial, Helvetica, sans-serif; box-shadow: 0 6px 20px rgba(0,0,0,.25);
+}
+.site-guard button { margin-inline-end: 10px; margin-top: 8px; padding: 10px 16px; min-height: 44px; font: 700 1.2rem Arial, sans-serif;
+  border-radius: 10px; border: 2px solid #3d2c00; background: #ffffff; color: #3d2c00; cursor: pointer; }
+
+/* חלון הסכמה לשירות חיצוני (consent-gate.js) */
+.cg-backdrop { position: fixed; inset: 0; background: rgba(31,26,20,.55); z-index: 100002;
+  display: flex; align-items: center; justify-content: center; padding: 16px; }
+.cg-dialog { background: #fffdf8; color: #1f1a14; border-radius: 16px; max-width: 34rem; width: 100%;
+  max-height: 90vh; overflow: auto; padding: 20px; font: 1.1rem/1.6 Arial, Helvetica, sans-serif; }
+.cg-dialog h2 { margin: 0 0 10px; font-size: 1.4rem; }
+.cg-dialog p { margin: 0 0 10px; }
+.cg-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.cg-actions button { flex: 1 1 10rem; min-height: 48px; padding: 10px 16px; font: 700 1.2rem Arial, sans-serif;
+  border-radius: 12px; border: 2px solid #0b4a8f; cursor: pointer; }
+.cg-actions .cg-yes { background: #0b4a8f; color: #ffffff; }
+.cg-actions .cg-no { background: #ffffff; color: #0b4a8f; }
+.cg-more { display: inline-flex; align-items: center; min-height: 44px; margin-top: 6px; color: #0b4a8f; }
+
+/* כותרת תחתונה עם קישורי הצהרות (legal-footer.js) */
+.site-legal { padding: 14px 16px; text-align: center; font: 1rem/1.6 Arial, Helvetica, sans-serif; font-size: max(1.0625rem, 17px); color: #1f1a14; }
+.site-legal a { color: #0b4a8f; text-decoration: underline; margin-inline: 8px; display: inline-flex; align-items: center; min-height: 44px; padding: 6px 4px; }

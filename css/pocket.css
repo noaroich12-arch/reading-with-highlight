@@ -1,0 +1,14 @@
+/* pocket.css: מילון הכיס: סימון מילים חדשות בטקסט, רשימת המילים וכפתור ההוספה בחלון המילון */
+/* מילה חדשה: רקע סגול בהיר וגם קו תחתון עבה, כדי שהסימון יראה גם למי שלא מבחינה בצבעים.
+   צהוב משמש למשפט הנוכחי וכתום למילה הנוכחית (cur), ולכן הסימון סגול */
+.w.newword:not(.cur){background:#e4d4ff;border-bottom:.12em solid #4c1d95;border-radius:.2em .2em 0 0}
+.groupInput{flex:1 1 200px;min-width:0;font-size:22px;padding:10px;border:3px solid var(--line);border-radius:12px;background:#fff}
+
+.pocketGroupHead{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin:18px 0 8px}
+.pocketHead{font-size:24px;font-weight:700;margin:0;word-break:break-word}
+#pocketCopyAll{margin:0 0 6px}
+.pWord{font-size:28px;font-weight:700;direction:ltr;text-align:left;word-break:break-word}
+.pHe{font-size:24px;margin:2px 0 10px}
+
+.pocketAct{margin:0 0 14px}
+#dictPocketNote{font-size:19px;margin:6px 0 0}

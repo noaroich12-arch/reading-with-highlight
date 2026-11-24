@@ -1,0 +1,35 @@
+/* base.css: בסיס: צבעים, כפתורים */
+:root{
+  --fs:32px;
+  --bg:#fffdf6;
+  --ink:#111;
+  --sent:#ffe9a0;
+  --word:#ffa94d;
+  --word-edge:#b45309;
+  --line:#222;
+  --bar:#f1ead6;
+  --accent:#1e3a8a;
+  --focus:#1d4ed8;
+}
+*{box-sizing:border-box}
+html{scroll-padding-bottom:200px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:1.5}
+[hidden]{display:none!important}
+
+button,select,textarea{font-family:inherit;color:inherit}
+button:focus-visible,select:focus-visible,textarea:focus-visible{outline:4px solid var(--focus);outline-offset:2px}
+
+.btn{
+  min-width:64px;min-height:64px;padding:6px 10px;
+  border:3px solid var(--line);border-radius:14px;background:#fff;color:#111;
+  font-size:17px;font-weight:700;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+}
+.btn:hover{background:#f3f0e4}
+.btn:active{background:#e6e0cc}
+.btn svg{width:26px;height:26px;fill:currentColor;display:block}
+.btn.flip svg{transform:scaleX(-1)}
+.btn.wide{flex-direction:row;gap:10px;min-width:0;padding:6px 22px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#172e6e}
+.btn.small{min-height:48px;min-width:48px;font-size:18px}

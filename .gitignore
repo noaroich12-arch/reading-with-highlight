@@ -1,0 +1,9 @@
+*.docx
+~$*
+*.pyc
+__pycache__/
+.env
+*.bak
+*.log
+# יומן פנימי של בדיקות (לא לפרסום)
+COMPLIANCE-LOG.md
