@@ -46,7 +46,7 @@ async function fillTranslation(key, askConsent){
 /** משלים תרגום לכל המילים שנשמרו בלי תרגום (רק אם כבר יש הסכמה למילון). נקרא כשפותחים את "המילון שלי". */
 async function fillAllMissingTranslations(){
   if (!ConsentGate.has('dictionary')) return;
-  const missing = Object.values(pocketAll()).filter(x => x && x.w && !x.he);
+  const missing = Object.values(pocketAll()).filter(x => x && x.w && !x.he && !x.man);
   for (const e of missing) await fillTranslation(e.w, false);
 }
 

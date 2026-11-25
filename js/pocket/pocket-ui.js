@@ -35,9 +35,11 @@ function buildPocketRow(e){
   const word = DomBuild.make('div', 'pWord', e.w);
   word.lang = 'en'; word.dir = 'ltr';
   row.appendChild(word);
-  row.appendChild(DomBuild.make('div', 'pHe', e.he || 'אין תרגום שמור. אפשר לפתוח את המילה במילון בזמן קריאה.'));
+  const heLine = DomBuild.make('div', 'pHe', e.he || 'אין תרגום שמור. אפשר לכתוב תרגום בעצמך, או ללחוץ "תרגום".');
+  row.appendChild(heLine);
   const btns = DomBuild.make('div', 'libBtns');
   btns.appendChild(DomBuild.button('שמעי', 'small', () => speakSingleWord(e.w)));
+  btns.appendChild(DomBuild.button(e.he ? 'עריכת תרגום' : 'כתיבת תרגום', 'small', () => startHeEdit(heLine, e)));
   if (!e.he) btns.appendChild(DomBuild.button('תרגום', 'small', () => fillTranslation(e.w, true)));
   btns.appendChild(DomBuild.button(e.st === 'new' ? 'זכרתי אותה' : 'לא זכרתי', 'small', () => {
     pocketSetStatus(e.w, e.st === 'new' ? 'known' : 'new');

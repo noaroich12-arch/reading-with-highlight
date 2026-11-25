@@ -49,11 +49,12 @@ function pocketSetStatus(key, st){
   return pocketWrite();
 }
 
-/** מעדכן את התרגום של מילה שכבר במילון שלי. */
-function pocketSetHe(key, he){
+/** מעדכן את התרגום של מילה שכבר במילון שלי. manual=true: נכתב ביד, ולא ישלימו אותו אוטומטית. */
+function pocketSetHe(key, he, manual){
   const e = pocketEntry(key);
   if (!e) return false;
   e.he = he;
+  if (manual) e.man = true;
   return pocketWrite();
 }
 

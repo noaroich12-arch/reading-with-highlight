@@ -145,7 +145,7 @@ function makeUtterance(text){
 }
 
 /** מקריא מהמילה idx עד סוף המשפט שלה, ומסמן את המילים תוך כדי. בסוף המשפט ממשיך לבא (אם עדיין מקריאים).
-    קול שלא הוכח שהוא מדווח על מילים מוקרא בקטעים לפי פסיקים (speech-chunks.js), כדי שהסימון יסתנכרן בכל קטע. */
+    המשפט מוקרא כולו ברצף, בלי הפסקות באמצע. */
 function speakFrom(idx){
   halt();
   clearTimeout(queueT);
@@ -154,7 +154,6 @@ function speakFrom(idx){
   const my = gen;
   const s = sentences[words[idx].s];
   try { if (synth.paused) synth.resume(); } catch(e){}
-  if (!voice || voiceHasBoundary[voice.name] !== true){ speakChunks(idx, s, my); return; }
   const { text, offs } = buildSpeechText(idx, s);
   const u = makeUtterance(text);
   utterRef = u;

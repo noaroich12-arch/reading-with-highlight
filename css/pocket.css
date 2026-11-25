@@ -9,6 +9,7 @@
 #pocketCopyAll{margin:0 0 6px}
 .pWord{font-size:28px;font-weight:700;direction:ltr;text-align:left;word-break:break-word}
 .pHe{font-size:24px;margin:2px 0 10px}
+.heInput{width:100%;box-sizing:border-box;font-size:24px;padding:10px;border:3px solid var(--line);border-radius:12px;background:#fff;margin-bottom:8px}
 
 .pocketAct{margin:0 0 14px}
 #dictPocketNote{font-size:19px;margin:6px 0 0}
