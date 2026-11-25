@@ -11,8 +11,21 @@ function halt(){
   try { synth.cancel(); } catch(e){}
 }
 
-/** כמה תווים בשנייה הקול הנוכחי מדבר (נלמד מהקראות קודמות), לצורך הערכת ההדגשה. */
-function getCps(){ return cpsMap[voice ? voice.name : ''] || 14.5; }
+/** מפתח שמירה של מהירות הדיבור: הקול והקצב יחד (קול מדבר לא באותו יחס בכל קצב). */
+function speedKey(){ return (voice ? voice.name : '') + '@' + rate; }
+
+/** כמה תווים בשנייה הקול הנוכחי מדבר בקצב הנוכחי (נלמד מהקראות קודמות), לצורך הערכת ההדגשה. */
+function getCps(){ return cpsMap[speedKey()] || 14.5 * rate; }
+
+/** לומד מהירות דיבור מהקראה שהסתיימה: text הוקרא תוך secs שניות. הממוצע נשמר לקול ולקצב הנוכחיים. */
+function learnSpeed(text, secs){
+  if (text.length < 15 || secs < 0.5) return;
+  const measured = text.length / secs;
+  if (measured < 5 * rate || measured > 40 * rate) return;
+  const key = speedKey(), old = cpsMap[key];
+  cpsMap[key] = old ? old * 0.5 + measured * 0.5 : measured;
+  store.set('tts.cps', JSON.stringify(cpsMap));
+}
 
 /** בונה את טקסט ההקראה מהמילה idx עד סוף המשפט s, ושומר באיזה מקום בטקסט מתחילה כל מילה (offs). מילה בלי אותיות מוקראת כפסיק */
 function buildSpeechText(idx, s){
@@ -51,7 +64,7 @@ function startEstimate(ses){
     cum.push(total);
     total += t.length + 1.2 + (/[,;:]["'”’)\]]*$/.test(t) ? 3 : 0) + (END_RE.test(t) ? 4 : 0);
   }
-  const dur = (text.length / (getCps() * rate)) * 1000;
+  const dur = (text.length / getCps()) * 1000;
   let k = 0;
   estTimer = setInterval(() => {
     if (my !== gen){ clearInterval(estTimer); return; }
@@ -91,18 +104,7 @@ function onSpeechBoundary(ses, e){
 /** המשפט הוקרא עד הסוף: לומד כמה מהר הקול באמת מדבר (להערכה מדויקת יותר), וממשיך למשפט הבא */
 function onSpeechEnd(ses){
   if (ses.my !== gen) return;
-  const text = ses.text;
-  if (!ses.gotBoundary && ses.started && text.length > 40 && voice){
-    const secs = (performance.now() - ses.tStart) / 1000;
-    if (secs > 0.5){
-      const measured = text.length / secs / rate;
-      if (measured > 5 && measured < 40){
-        const old = cpsMap[voice.name];
-        cpsMap[voice.name] = old ? old * 0.7 + measured * 0.3 : measured;
-        store.set('tts.cps', JSON.stringify(cpsMap));
-      }
-    }
-  }
+  if (!ses.gotBoundary && ses.started && voice) learnSpeed(ses.text, (performance.now() - ses.tStart) / 1000);
   if (!playing) return;
   speakFrom(ses.s.last + 1);
 }

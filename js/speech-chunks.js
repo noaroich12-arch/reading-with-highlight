@@ -49,6 +49,7 @@ function onChunkEnd(ch){
   if (p.my !== gen) return;
   clearInterval(estTimer); clearTimeout(fbTimer);
   estTimer = null;
+  if (!ch.gotBoundary && ch.started && voice) learnSpeed(ch.text, (performance.now() - ch.tStart) / 1000);
   if (cur !== ch.s.last) setCur(ch.s.last);
   if (ch.isLast && playing) speakFrom(p.s.last + 1);
 }
