@@ -16,31 +16,45 @@ function addWordToMyDictionary(word, he){
   return true;
 }
 
-/** משלים תרגום למילה שנוספה בלי תרגום. בלי הסכמה למילון: רק אם askConsent, ואז שואל. */
-async function fillTranslation(key, askConsent){
-  const e = pocketEntry(key);
-  if (!e || e.he) return;
+/** מחזיר תרגום ראשי למילה, או '' אם אי אפשר. בלי הסכמה למילון: רק אם askConsent, ואז שואל. */
+async function translationFor(word, askConsent){
   if (!ConsentGate.has('dictionary')){
-    if (!askConsent || !(await requestDictConsent())) return;
+    if (!askConsent || !(await requestDictConsent())) return '';
   }
-  try {
-    const res = await lookup(e.w);
-    pocketSetHe(key, res.main);
-    if (!$('#pocket').hidden) renderPocketList();
-  } catch(err){
-    if (askConsent) toast('לא הצלחתי למצוא תרגום עכשיו. אפשר לנסות שוב בעוד רגע.');
-  }
+  try { return (await lookup(word)).main; } catch(err){ return ''; }
 }
 
-/** כפתור "מילה חדשה": מוסיף את המילה הנוכחית למילון שלי (בלי לפתוח את המילון). */
-function addCurrentWord(){
+/** משלים תרגום למילה שנוספה בלי תרגום. מחזיר true אם הצליח. */
+async function fillTranslation(key, askConsent){
+  const e = pocketEntry(key);
+  if (!e || e.he) return !!(e && e.he);
+  const he = await translationFor(e.w, askConsent);
+  if (!he){
+    if (askConsent) toast('לא הצלחתי למצוא תרגום עכשיו. אפשר לנסות שוב בעוד רגע.');
+    return false;
+  }
+  pocketSetHe(key, he);
+  if (!$('#pocket').hidden) renderPocketList();
+  return true;
+}
+
+/** משלים תרגום לכל המילים שנשמרו בלי תרגום (רק אם כבר יש הסכמה למילון). נקרא כשפותחים את "המילון שלי". */
+async function fillAllMissingTranslations(){
+  if (!ConsentGate.has('dictionary')) return;
+  const missing = Object.values(pocketAll()).filter(x => x && x.w && !x.he);
+  for (const e of missing) await fillTranslation(e.w, false);
+}
+
+/** כפתור "מילה חדשה": מביא את התרגום ושומר את המילה הנוכחית יחד איתו במילון שלי. */
+async function addCurrentWord(){
   if (!words.length) return;
   const w = cleanWord(words[cur].t);
   if (!w){ toast('במילה הזאת אין מה להוסיף. אפשר לבחור מילה אחרת.'); return; }
   const key = pocketKey(w), e = pocketEntry(key);
   if (e && e.st === 'new'){ toast('המילה כבר במילון שלי: ' + w); return; }
   if (e){ pocketSetStatus(key, 'new'); applyPocketMarks(); toast('סומנה שוב כמילה חדשה: ' + w); return; }
-  if (!addWordToMyDictionary(w, '')) return;
-  toast('נוספה למילון שלי: ' + w);
-  fillTranslation(key, false);
+  const he = await translationFor(w, true);
+  if (!addWordToMyDictionary(w, he)) return;
+  toast(he ? 'נוספה למילון שלי: ' + w + ' = ' + he
+           : 'נוספה בלי תרגום: ' + w + '. אפשר ללחוץ "תרגום" ב"המילון שלי".');
 }

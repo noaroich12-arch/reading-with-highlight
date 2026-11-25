@@ -19,7 +19,8 @@ function onDictPocketClick(){
   const e = pocketEntry(key);
   if (!e){
     if (!addWordToMyDictionary(dictWordNow, dictHeNow)) return;
-    toast('נוספה למילון שלי: ' + dictWordNow);
+    toast('נוספה למילון שלי: ' + dictWordNow + (dictHeNow ? ' = ' + dictHeNow : ''));
+    if (!dictHeNow) fillTranslation(key, false);   // התרגום עוד לא הגיע: משלימים אותו
   } else {
     pocketSetStatus(key, e.st === 'new' ? 'known' : 'new');
   }
@@ -87,4 +88,5 @@ function openPocket(){
   if (playing) pause();
   renderPocketList();
   openDialog('pocket', '#pocketClose');
+  fillAllMissingTranslations();
 }
