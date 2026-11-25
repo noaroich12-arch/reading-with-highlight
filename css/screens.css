@@ -41,6 +41,9 @@ html.reading,html.reading body{height:100%;overflow:hidden;overscroll-behavior:n
 .w{border-radius:.2em;padding:.03em .05em;cursor:pointer}
 .w:hover{outline:2px dotted #666}
 .w.cur{background:var(--word);box-shadow:0 0 0 .07em var(--word-edge);color:#000}
+/* סימון כתום כבוי (כפתור "סימון כתום"): בלי צבע למשפט ולמילה הנוכחיים */
+html.hl-off .s.cur{background:transparent}
+html.hl-off .w.cur{background:transparent;box-shadow:none;color:inherit}
 
 #controls{
   flex:0 0 auto;position:relative;z-index:30;

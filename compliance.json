@@ -87,6 +87,12 @@
         "retention": "עד שמוחקים"
       },
       {
+        "key": "tts.hlOff",
+        "purpose": "זכירה אם הסימון הכתום כבוי או דולק",
+        "contains": "הספרה 0 או 1",
+        "retention": "עד שמוחקים"
+      },
+      {
         "key": "tts.voice",
         "purpose": "זכירת הקול שנבחר",
         "contains": "שם הקול",
