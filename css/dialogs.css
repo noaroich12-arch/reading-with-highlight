@@ -32,7 +32,8 @@
 #dictBox .row{position:sticky;bottom:0;z-index:1;background:#fffdf6;margin-top:6px;padding:10px 0 14px}
 #dictSay{order:1}
 #dictClose{order:2}
-#dictGoogle{order:3}
+#dictSentence{order:3}
+#dictSentenceOut{font-size:30px;line-height:1.5;margin:0 0 14px;padding:12px 14px;border:2px solid #555;border-radius:12px;background:#fff}
 
 #toast{
   position:fixed;left:50%;top:84px;transform:translateX(-50%);z-index:60;

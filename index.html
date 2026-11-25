@@ -148,13 +148,14 @@
   <div id="dictBox">
     <div id="dictWord" lang="en" dir="ltr"></div>
     <div id="dictHe" lang="he" dir="rtl" aria-live="polite"></div>
+    <div id="dictSentenceOut" lang="he" dir="rtl" aria-live="polite" hidden></div>
     <div class="pocketAct">
       <button class="btn small wide" id="dictPocketBtn" type="button" hidden>מילה חדשה: להוסיף למילון שלי</button>
       <p id="dictPocketNote" aria-live="polite"></p>
     </div>
     <div class="row">
       <button class="btn small wide" id="dictSay" type="button">שמעי את המילה</button>
-      <a class="btn small wide" id="dictGoogle" href="https://translate.google.com/" target="_blank" rel="noopener noreferrer">פתיחה ב-Google Translate</a>
+      <button class="btn small wide" id="dictSentence" type="button">תרגום המשפט</button>
       <button class="btn wide primary" id="dictClose" type="button">סגירה</button>
     </div>
   </div>
@@ -223,6 +224,7 @@
 <script src="js/speech.js"></script>
 <script src="js/navigation.js"></script>
 <script src="js/dictionary.js"></script>
+<script src="js/sentence-translate.js"></script>
 <script src="js/pocket/pocket-store.js"></script>
 <script src="js/pocket/pocket-markers.js"></script>
 <script src="js/pocket/pocket-copy.js"></script>

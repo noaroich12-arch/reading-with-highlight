@@ -81,11 +81,11 @@ async function openDict(){
   refreshDictPocket();
   $('#dictWord').textContent = w;
   $('#dictHe').textContent = 'מחפש תרגום…';
-  $('#dictGoogle').href = 'https://translate.google.com/?sl=en&tl=iw&op=translate&text=' + encodeURIComponent(w);
+  resetSentenceBox();
   openDialog('dict', '#dictClose');
   try {
     if (!(await requestDictConsent())){
-      $('#dictHe').textContent = 'המילון לא הופעל. אפשר לתרגם בלחיצה על "פתיחה ב-Google Translate", שפותח את האתר של Google.';
+      $('#dictHe').textContent = 'המילון לא הופעל, כי לא אושרה שליחה ל-Google. אפשר לסגור ולפתוח את המילון שוב ולאשר.';
       return;
     }
     const res = await lookup(w);
@@ -109,7 +109,7 @@ async function openDict(){
     });
   } catch(e){
     if (dictWordNow !== w) return;
-    $('#dictHe').textContent = 'לא הצלחתי למצוא תרגום עכשיו. אפשר ללחוץ על הכפתור "פתיחה ב-Google Translate", או לנסות שוב בעוד רגע.';
+    $('#dictHe').textContent = 'לא הצלחתי למצוא תרגום עכשיו. אפשר לסגור ולפתוח את המילון שוב בעוד רגע.';
   }
 }
 

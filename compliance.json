@@ -45,7 +45,7 @@
       "המילון תלוי בשירות חיצוני, ולפעמים אינו זמין."
     ],
     "alternatives": [
-      "אם המילון אינו זמין או לא אושר, אפשר ללחוץ על \"פתיחה ב-Google Translate\"."
+      "אם המילון אינו זמין או לא אושר, אפשר להמשיך לקרוא בלי תרגום, ולנסות שוב מאוחר יותר."
     ],
     "exemption_note": ""
   },
@@ -144,17 +144,15 @@
       "domains": [
         "translate.googleapis.com"
       ],
-      "when": "כשלוחצים על \"מילון\"",
-      "sent": "המילה שנבחרה וכתובת ה-IP של המכשיר",
-      "purpose": "תרגום המילה לעברית",
+      "when": "כשלוחצים על \"מילון\", על \"תרגום המשפט\", או על \"מילה חדשה\" (כדי לשמור את המילה עם תרגום)",
+      "sent": "המילה שנבחרה, או המשפט שבו היא נמצאת, וכתובת ה-IP של המכשיר",
+      "purpose": "תרגום המילה או המשפט לעברית",
       "country": "ארצות הברית",
       "needs_consent": true,
       "policy_url": "https://policies.google.com/privacy"
     }
   ],
-  "allowed_links": [
-    "https://translate.google.com/"
-  ],
+  "allowed_links": [],
   "device_features": [
     {
       "id": "speech-synthesis",

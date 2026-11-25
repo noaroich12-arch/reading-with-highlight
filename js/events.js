@@ -47,6 +47,7 @@ $('#moreBtn').addEventListener('click', () => {
 $('#dictBtn').addEventListener('click', openDict);
 $('#dictClose').addEventListener('click', () => closeDialog('dict'));
 $('#dictSay').addEventListener('click', sayWord);
+$('#dictSentence').addEventListener('click', onSentenceTranslateClick);
 $('#dict').addEventListener('click', e => { if (e.target.id === 'dict') closeDialog('dict'); });
 
 // לחיצה על מילה מעבירה אליה את המיקום
