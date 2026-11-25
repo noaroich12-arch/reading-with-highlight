@@ -16,10 +16,15 @@ function addWordToMyDictionary(word, he){
   return true;
 }
 
-/** מחזיר תרגום ראשי למילה, או '' אם אי אפשר. בלי הסכמה למילון: רק אם askConsent, ואז שואל. */
-async function translationFor(word, askConsent){
+/** מחזיר תרגום ראשי למילה, או '' אם אי אפשר. בלי הסכמה למילון: רק אם askConsent, ואז שואל.
+    inContext: המילה היא המילה הנוכחית בטקסט, אז קודם מנסים תרגום לפי ההקשר של המשפט. */
+async function translationFor(word, askConsent, inContext){
   if (!ConsentGate.has('dictionary')){
     if (!askConsent || !(await requestDictConsent())) return '';
+  }
+  if (inContext){
+    const ctx = await contextTranslationNow();
+    if (ctx) return ctx;
   }
   try { return (await lookup(word)).main; } catch(err){ return ''; }
 }
@@ -53,7 +58,7 @@ async function addCurrentWord(){
   const key = pocketKey(w), e = pocketEntry(key);
   if (e && e.st === 'new'){ toast('המילה כבר במילון שלי: ' + w); return; }
   if (e){ pocketSetStatus(key, 'new'); applyPocketMarks(); toast('סומנה שוב כמילה חדשה: ' + w); return; }
-  const he = await translationFor(w, true);
+  const he = await translationFor(w, true, true);
   if (!addWordToMyDictionary(w, he)) return;
   toast(he ? 'נוספה למילון שלי: ' + w + ' = ' + he
            : 'נוספה בלי תרגום: ' + w + '. אפשר ללחוץ "תרגום" ב"המילון שלי".');

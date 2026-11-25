@@ -32,6 +32,7 @@ css/notes.css           קו גלי מתחת למילה עם הערה, ושדה 
 css/text-edit.css       שורת הכפתורים מעל הטקסט ומסך העריכה
 js/navigation.js        ניווט ומהירות
 js/dictionary.js        המילון (Google Translate, אחרי הסכמה)
+js/context-translate.js  תרגום המילה לפי ההקשר של המשפט (מילה עטופה ב-<b> בתוך משפט ל-Google)
 js/sentence-translate.js  כפתור "תרגום המשפט" בחלון המילון (מציג את התרגום באתר)
 js/screens.js           מסכים, חלונות וגודל טקסט
 js/events.js            חיבור לחיצות ומקשים

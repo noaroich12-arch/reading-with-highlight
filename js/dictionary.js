@@ -63,13 +63,38 @@ async function lookup(word){
 function requestDictConsent(){
   return ConsentGate.ask('dictionary', {
     title: 'המילון משתמש ב-Google Translate',
-    text: 'כדי להציג תרגום, המילה שנבחרה נשלחת לשרתים של Google, יחד עם כתובת ה-IP של המכשיר.\nבלי אישור המילה לא נשלחת, ושאר האתר ממשיך לעבוד כרגיל.',
+    text: 'כדי להציג תרגום מדויק, המילה שנבחרה והמשפט שבו היא נמצאת נשלחים לשרתים של Google, יחד עם כתובת ה-IP של המכשיר.\nבלי אישור שום דבר לא נשלח, ושאר האתר ממשיך לעבוד כרגיל.',
     yes: 'אפשר', no: 'לא עכשיו', moreUrl: 'legal/privacy.html', moreLabel: 'פרטים נוספים בדף הפרטיות'
   });
 }
 
 let dictWordNow = '';
 let dictHeNow = '';      // התרגום הראשי שהוצג, כדי לשמור אותו במילון הכיס
+
+/** מציג בחלון המילון: קודם התרגום לפי ההקשר של המשפט (אם יש), ואחריו המשמעויות הכלליות של המילה. */
+function renderDictResult(res, ctx){
+  const he = $('#dictHe');
+  he.textContent = '';
+  const main = document.createElement('div');
+  main.textContent = ctx || res.main;
+  he.appendChild(main);
+  if (!res) return;
+  if (ctx && ctx !== res.main) he.appendChild(makeAltLine('בדרך כלל', [res.main]));
+  res.groups.forEach(g => he.appendChild(makeAltLine(g.label, g.words)));
+}
+
+/** שורת משמעויות: תווית מודגשת ואחריה כל מילה במסגרת. */
+function makeAltLine(label, wordList){
+  const d = document.createElement('div');
+  d.className = 'alt';
+  if (label){
+    const b = document.createElement('b');
+    b.textContent = label + ': ';
+    d.appendChild(b);
+  }
+  wordList.forEach(t => { const sp = document.createElement('span'); sp.className = 'dw'; sp.textContent = t; d.appendChild(sp); });
+  return d;
+}
 /** פותח את חלון המילון למילה הנוכחית: מבקש הסכמה, מחפש תרגום ומציג אותו. */
 async function openDict(){
   if (!words.length) return;
@@ -88,25 +113,13 @@ async function openDict(){
       $('#dictHe').textContent = 'המילון לא הופעל, כי לא אושרה שליחה ל-Google. אפשר לסגור ולפתוח את המילון שוב ולאשר.';
       return;
     }
-    const res = await lookup(w);
+    const ctxPromise = contextTranslationNow();
+    const res = await lookup(w).catch(() => null);
+    const ctx = await ctxPromise;
     if (dictWordNow !== w) return;
-    dictHeNow = res.main;
-    const he = $('#dictHe');
-    he.textContent = '';
-    const main = document.createElement('div');
-    main.textContent = res.main;
-    he.appendChild(main);
-    res.groups.forEach(g => {
-      const d = document.createElement('div');
-      d.className = 'alt';
-      if (g.label){
-        const b = document.createElement('b');
-        b.textContent = g.label + ': ';
-        d.appendChild(b);
-      }
-      g.words.forEach(t => { const sp = document.createElement('span'); sp.className = 'dw'; sp.textContent = t; d.appendChild(sp); });
-      he.appendChild(d);
-    });
+    if (!res && !ctx) throw new Error('empty');
+    dictHeNow = ctx || res.main;
+    renderDictResult(res, ctx);
   } catch(e){
     if (dictWordNow !== w) return;
     $('#dictHe').textContent = 'לא הצלחתי למצוא תרגום עכשיו. אפשר לסגור ולפתוח את המילון שוב בעוד רגע.';
