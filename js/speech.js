@@ -71,7 +71,7 @@ function startEstimate(ses){
     const el = performance.now() - ses.tStart;
     const pos = (el / dur) * total;
     while (k < n - 1 && cum[k + 1] <= pos) k++;
-    const t = clamp(idx + k + lead, idx, s.last);
+    const t = clamp(idx + k + (ses.lead === undefined ? lead : ses.lead), idx, s.last);
     if (t !== cur) setCur(t);
   }, 40);
 }
@@ -97,7 +97,7 @@ function onSpeechBoundary(ses, e){
     if (voice){ voiceHasBoundary[voice.name] = true; updateVoiceNote(); }
   }
   const k = wordIndexAtChar(ses.offs, e.charIndex || 0);
-  const t = clamp(ses.idx + k + lead, ses.idx, ses.s.last);
+  const t = clamp(ses.idx + k + (ses.lead === undefined ? lead : ses.lead), ses.idx, ses.s.last);
   if (t !== cur) setCur(t);
 }
 
@@ -144,7 +144,8 @@ function makeUtterance(text){
   return u;
 }
 
-/** מקריא מהמילה idx עד סוף המשפט שלה ברצף אחד (בלי הפסקות באמצע), ומסמן את המילים תוך כדי. בסוף המשפט ממשיך לבא (אם עדיין מקריאים). */
+/** מקריא מהמילה idx עד סוף המשפט שלה, ומסמן את המילים תוך כדי. בסוף המשפט ממשיך לבא (אם עדיין מקריאים).
+    קול שלא הוכח שהוא מדווח על מילים מוקרא בקטעים לפי פסיקים (speech-chunks.js), כדי שהסימון יסתנכרן בכל קטע. */
 function speakFrom(idx){
   halt();
   clearTimeout(queueT);
@@ -153,6 +154,7 @@ function speakFrom(idx){
   const my = gen;
   const s = sentences[words[idx].s];
   try { if (synth.paused) synth.resume(); } catch(e){}
+  if (!voice || voiceHasBoundary[voice.name] !== true){ speakChunks(idx, s, my); return; }
   const { text, offs } = buildSpeechText(idx, s);
   const u = makeUtterance(text);
   utterRef = u;
