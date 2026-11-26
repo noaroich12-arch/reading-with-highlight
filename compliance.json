@@ -87,8 +87,14 @@
         "retention": "עד שמוחקים"
       },
       {
-        "key": "tts.hlOff",
-        "purpose": "זכירה אם הסימון הכתום כבוי או דולק",
+        "key": "tts.hlWordOff",
+        "purpose": "זכירה אם סימון המילה הנוכחית כבוי או דולק",
+        "contains": "הספרה 0 או 1",
+        "retention": "עד שמוחקים"
+      },
+      {
+        "key": "tts.hlSentOff",
+        "purpose": "זכירה אם סימון המשפט הנוכחי כבוי או דולק",
         "contains": "הספרה 0 או 1",
         "retention": "עד שמוחקים"
       },
